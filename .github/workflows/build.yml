@@ -1,0 +1,77 @@
+name: Build Aanalog TV Tools
+run-name: Build No.${{ github.run_number }} on behalf of ${{ github.actor }}
+
+on:
+    workflow_dispatch:
+#    pull_request: 
+#        types: [opened, reopened, synchronize]
+    push: 
+        branches: [master]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: windows-latest
+            platform: windows
+            arch: x64
+            build_gnurado_blocks: OFF
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+            build_gnurado_blocks: ON
+    steps:
+
+      - name: Install Ubuntu Prerequisites
+        if: ${{ matrix.platform == 'linux' }}
+        run: |
+          gcc --version
+          sudo apt-get update
+          sudo apt-get --yes install autoconf automake pkg-config autoconf-archive
+          sudo apt-get --yes install liburing-dev libx11-dev libxft-dev libtool bison gperf libgles2-mesa-dev libxext-dev libxrandr-dev libxi-dev 
+          sudo apt-get --yes install libxcursor-dev libxdamage-dev libxinerama-dev libltdl-dev libxtst-dev doxygen gnuradio gnuradio-dev
+          sudo pip3 install pytest
+
+      - name: Install Windows Prerequisites
+        if: ${{ matrix.platform == 'windows' }}
+        run: |
+          pip3 install pytest
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: vcpkg build
+        id: vcpkg
+        uses: johnwason/vcpkg-action@v6
+        with:
+          manifest-dir: ${{ github.workspace }} # Set to directory containing vcpkg.json
+          triplet: ${{ matrix.arch}}-${{matrix.platform}}-release
+          token: ${{ github.token }}
+          github-binarycache: true
+
+      - name: Configure project
+        run: |
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} --preset=${{ matrix.platform }}-rel -S ./ -B ./build -DBUILD_GNURADIO_BLOCKS=${{ matrix.build_gnurado_blocks }}
+
+      - name: Build
+        run: |
+          cmake --build ./build --config=RelWithDebInfo
+
+      - name: Run Tests
+        run: |
+          ctest --test-dir ./build -T test --output-on-failure -C RelWithDebInfo --verbose --output-log ./reports/tests.log
+
+      - name: Make installation
+        run: |
+          cmake --install ./build --prefix=./install --config=RelWithDebInfo
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: analog-tv-tools-${{ matrix.platform }}
+          include-hidden-files: true
+          path: |
+            install/
