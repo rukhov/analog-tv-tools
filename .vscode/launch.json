@@ -1,0 +1,241 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // C:\Users\rukho\radioconda\python.exe C:\Users\rukho\radioconda\cwp.py C:\Users\rukho\radioconda C:\Users\rukho\radioconda\Scripts\gnuradio-companion.exe
+    "version": "0.2.0",
+    "configurations": [
+    {
+        "preLaunchTask": "CopyBins",
+        "name": "(windows) debug GRC test",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "C:/Users/rukhov/radioconda/python.exe",
+        "args": ["-u", "M:/projects/atv/tv-demod/plltest.py"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/build/lib/RelWithDebInfo",
+        "environment": 
+            [
+                {"name": "PATH", "value": "C:\\Users\\rukhov\\radioconda;C:\\Users\\rukhov\\radioconda\\Library\\mingw-w64\\bin;C:\\Users\\rukhov\\radioconda\\Library\\usr\\bin;C:\\Users\\rukhov\\radioconda\\Library\\bin;C:\\Users\\rukhov\\radioconda\\Scripts;$(PATH)"}, 
+                {"name": "GRC_BLOCKS_PATH", "value": "$(GRC_BLOCKS_PATH);${workspaceFolder}\\grc"},
+                {"name": "PYTHONPATH", "value": "$(PYTHONPATH);${workspaceFolder}\\..\\install\\lib\\site-packages"}
+            ],
+        "console": "externalTerminal"
+    },
+    {
+        "name": "(windows) debug integration tests",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/itest/RelWithDebInfo/atv-tools_integration_tests.exe",
+        "args": [""],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/itest/RelWithDebInfo",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    {
+        "name": "(windows) debug ",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/utest/RelWithDebInfo/atv-tools_unit_tests.exe",
+        "args": [""],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/utest/RelWithDebInfo",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    {
+        "name": "(windows) debug atv-tools-cli - to RAW",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo/atv-tools-cli.exe",
+        "args": [
+            "--input-type", "auto",
+            "--output-type", "raw",
+            "--input-file", "C:\\!share\\share\\tmp\\PAL\\2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.cvbs",
+            "--out-cvbs-raw-file", "${workspaceFolder}/../tests/2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.raw",
+            "--sample-rate", "28636364",
+            "--amplification", "1.8",
+            "--dc-correction", "0.24"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli/Debug",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    
+    {
+        "name": "(windows) debug atv-tools-cli - from flac-CVBS",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo/atv-tools-cli.exe",
+        "args": [
+            "--input-type", "auto",
+            "--output-type", "avi",
+            "--input-file", "C:\\!share\\share\\tmp\\PAL\\2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.cvbs",
+            "--output-file", "${workspaceFolder}/../tests/2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.avi",
+            "--sample-rate", "28636364",
+            "--amplification", "1.8",
+            "--dc-correction", "0.24",
+            "--max-frames", "10"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli/Debug",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    
+    {
+        "name": "(windows) debug atv-tools-cli - from RAW cvbs",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo/atv-tools-cli.exe",
+        "args": [
+            "--input-type", "raw",
+            "--input-data-type", "fm",
+            "--standard", "pal",
+            "--input-file", "${workspaceFolder}/../tests/2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.raw",
+            "--output-file", "${workspaceFolder}/../tests/2023-SMPTE-WSS-Squeeze-CXADC-CX-Blue-8bit.avi",
+            "--sample-rate", "35468950",
+            "--amplification", "1.",
+            "--dc-correction", "0.",
+            "--max-frames", "2"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    {
+        "name": "(windows) debug atv-tools-cli - from FM",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo/atv-tools-cli.exe",
+        "args": [
+            "--input-type", "auto",
+            "--output-type", "avi",
+            "--out-cvbs-raw-file", "${workspaceFolder}/../tests/HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.raw",
+            "--input-data-type", "fm",
+            "--baseband-carrier-frequency","4400000",
+            "--standard", "ntsc",
+            "--input-file", "C:\\usr\\projects\\GitHub\\fpv-tools\\samples\\HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.wav",
+            "--output-file", "${workspaceFolder}/../tests/HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.avi",
+            "--sample-rate", "20000000",
+            "--amplification", "1.0",
+            "--dc-correction", ".0",
+            "--max-frames", "20000"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli/RelWithDebInfo",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    {
+        "name": "(windows) release atv-tools-cli - from FM",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/Release/atv-tools-cli.exe",
+        "args": [
+            "--input-type", "auto",
+            "--output-type", "avi",
+            "--out-cvbs-raw-file", "${workspaceFolder}/../tests/HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.raw",
+            "--input-data-type", "fm",
+            "--baseband-carrier-frequency","4400000",
+            "--standard", "ntsc",
+            "--input-file", "C:\\usr\\projects\\GitHub\\fpv-tools\\samples\\HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.wav",
+            "--output-file", "${workspaceFolder}/../tests/HackRF_20250120_215344Z_5841150kHz_IQ_NTSC_20_MSPS.avi",
+            "--sample-rate", "20000000",
+            "--amplification", "1.0",
+            "--dc-correction", ".0",
+            "--max-frames", "20000"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli/Release",
+        "environment": 
+            [],
+        "console": "externalTerminal"
+    },
+    {
+        "preLaunchTask": "CopyDbgBins",
+        "name": "windows-dbg - GRC",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "C:\\Users\\rukho\\radioconda\\python.exe",
+        "args": ["-u", "C:\\usr\\projects\\GitHub\\fpv-tools\\tests\\AtvToolsTest.py"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/gr-AtvTools/lib/Debug",
+        "environment": 
+            [
+                {"name": "PATH", "value": "C:\\Users\\rukho\\radioconda;C:\\Users\\rukho\\radioconda\\Library\\mingw-w64\\bin;C:\\Users\\rukho\\radioconda\\Library\\usr\\bin;C:\\Users\\rukho\\radioconda\\Library\\bin;C:\\Users\\rukho\\radioconda\\Scripts;$(PATH)"}, 
+                {"name": "GRC_BLOCKS_PATH", "value": "${workspaceFolder}/src/gr-AtvTools/grc;$(GRC_BLOCKS_PATH)"},
+                {"name": "PYTHONPATH", "value": "$(PYTHONPATH);${workspaceFolder}\\..\\install\\lib\\site-packages"}
+            ],
+        "console": "externalTerminal",
+        "symbolOptions": {
+            "searchPaths": [
+            ],
+            "searchMicrosoftSymbolServer": false,
+            "cachePath": "C:\\symbols",
+            "moduleFilter": {
+                "mode": "loadAllButExcluded",
+                "excludedModules": [ "" ]
+            }
+        }
+    },
+    {
+        "preLaunchTask": "CopyRelBins",
+        "name": "windows-rel - GRC",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "C:\\Users\\rukho\\radioconda\\python.exe",
+        "args": ["-u", "C:\\usr\\projects\\GitHub\\fpv-tools\\tests\\AtvToolsTest.py"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/gr-AtvTools/lib/RelWithDebInfo",
+        "environment": 
+            [
+                {"name": "PATH", "value": "C:\\Users\\rukho\\radioconda;C:\\Users\\rukho\\radioconda\\Library\\mingw-w64\\bin;C:\\Users\\rukho\\radioconda\\Library\\usr\\bin;C:\\Users\\rukho\\radioconda\\Library\\bin;C:\\Users\\rukho\\radioconda\\Scripts;$(PATH)"}, 
+                {"name": "GRC_BLOCKS_PATH", "value": "${workspaceFolder}/src/gr-AtvTools/grc;$(GRC_BLOCKS_PATH)"},
+                {"name": "PYTHONPATH", "value": "$(PYTHONPATH);${workspaceFolder}\\..\\install\\lib\\site-packages"}
+            ],
+        "console": "externalTerminal",
+        "symbolOptions": {
+            "searchPaths": [
+            ],
+            "searchMicrosoftSymbolServer": false,
+            "cachePath": "C:\\symbols",
+            "moduleFilter": {
+                "mode": "loadAllButExcluded",
+                "excludedModules": [ "" ]
+            }
+        }
+    },
+    {
+        "preLaunchTask": "CopyRelOptBins",
+        "name": "windows-rel-opt - GRC",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "C:\\Users\\rukho\\radioconda\\python.exe",
+        "args": ["-u", "C:\\usr\\projects\\GitHub\\fpv-tools\\tests\\AtvToolsTest.py"],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/gr-AtvTools/lib/Release",
+        "environment": 
+            [
+                {"name": "PATH", "value": "C:\\Users\\rukho\\radioconda;C:\\Users\\rukho\\radioconda\\Library\\mingw-w64\\bin;C:\\Users\\rukho\\radioconda\\Library\\usr\\bin;C:\\Users\\rukho\\radioconda\\Library\\bin;C:\\Users\\rukho\\radioconda\\Scripts;$(PATH)"}, 
+                {"name": "GRC_BLOCKS_PATH", "value": "${workspaceFolder}/src/gr-AtvTools/grc;$(GRC_BLOCKS_PATH)"},
+                {"name": "PYTHONPATH", "value": "$(PYTHONPATH);${workspaceFolder}\\..\\install\\lib\\site-packages"}
+            ],
+        "console": "externalTerminal",
+        "symbolOptions": {
+            "searchPaths": [
+            ],
+            "searchMicrosoftSymbolServer": false,
+            "cachePath": "C:\\symbols",
+            "moduleFilter": {
+                "mode": "loadAllButExcluded",
+                "excludedModules": [ "" ]
+            }
+        }
+    }
+ ]
+}

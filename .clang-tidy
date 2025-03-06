@@ -1,0 +1,11 @@
+---
+Checks:          'cppcoreguidelines-*,modernize-*'
+ExtraArgs:
+  - -Wno-unknown-pragmas
+HeaderFileExtensions:
+  - h
+ImplementationFileExtensions:
+  - c
+  - cc
+  - cpp
+HeaderFilterRegex: 'src/*.h$'

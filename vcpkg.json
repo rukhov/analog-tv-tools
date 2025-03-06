@@ -1,0 +1,10 @@
+{
+  "dependencies": [
+    "boost",
+    "pybind11",
+    "gtest",
+    "opencv4",
+    "libsndfile",
+    "soxr"
+  ]
+}
