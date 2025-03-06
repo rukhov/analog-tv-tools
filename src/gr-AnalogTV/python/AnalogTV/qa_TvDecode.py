@@ -27,7 +27,7 @@ class qa_TvDecode(gr_unittest.TestCase):
 
     def test_instance(self):
         # FIXME: Test will fail until you pass sensible arguments to the constructor
-        instance = TvDecode()
+        instance = TvDecode(16000000)
 
     def test_001_descriptive_test_name(self):
         # set up fg
