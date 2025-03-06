@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.26)
 
 project(atv-tools VERSION 1.0.0 LANGUAGES CXX C)
 
+option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" ON)
+
 enable_testing()
 include(FetchContent)
 
