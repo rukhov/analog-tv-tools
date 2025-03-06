@@ -22,17 +22,20 @@ set(LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
 message("----------------> LIB_DIR: " ${LIB_DIR})
 
 if(UNIX)
-target_link_libraries(${TARGET_NAME} 
-	PUBLIC siglib
-	PUBLIC Boost::circular_buffer 
-	PUBLIC ${LIB_DIR}/libsoxr.a
-)
+	target_link_libraries(${TARGET_NAME} 
+		PUBLIC siglib
+		PUBLIC Boost::circular_buffer 
+		PUBLIC ${LIB_DIR}/libsoxr.a
+	)
+	target_compile_options(${TARGET_NAME} 
+		PRIVATE -fPIC
+		)
 elseif(WIN32)
-target_link_libraries(${TARGET_NAME} 
-	PUBLIC siglib
-	PUBLIC Boost::circular_buffer 
-	PUBLIC ${LIB_DIR}/soxr.lib
-)
+	target_link_libraries(${TARGET_NAME} 
+		PUBLIC siglib
+		PUBLIC Boost::circular_buffer 
+		PUBLIC ${LIB_DIR}/soxr.lib
+	)
 endif()
 
 
