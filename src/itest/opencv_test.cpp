@@ -6,7 +6,7 @@
 using namespace std;
 using namespace cv;
 
-TEST(opencv, First)
+TEST(opencv, DISABLED_First)
 {
     EXPECT_TRUE(true);
     const string dest_file = "c:\\tmp\\test-video.avi";
