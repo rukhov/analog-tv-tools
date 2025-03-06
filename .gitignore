@@ -1,6 +1,6 @@
 /build
 /install
-/src/gr-AtvTools/docs/doxygen/doxyxml/__pycache__
+__pycache__
 
 CMakeLists.txt.user
 CMakeCache.txt
@@ -14,4 +14,3 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
-/src/gr-AtvTools/docs/doxygen/doxyxml/generated/__pycache__

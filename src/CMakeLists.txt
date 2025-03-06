@@ -1,6 +1,7 @@
 add_subdirectory(lib-dsp)
 add_subdirectory(lib-atv-tools)
-add_subdirectory(gr-AtvTools)
+#add_subdirectory(gr-AtvTools)
+add_subdirectory(gr-AnalogTV)
 add_subdirectory(utest)
 add_subdirectory(itest)
 add_subdirectory(atv-tools-cli)
