@@ -41,7 +41,7 @@ add_compile_options( -DSIGLIB_DATA_FLOAT=1 )
 
 FetchContent_Declare(
   siglib
-  GIT_REPOSITORY git@github.com:rukhov/siglib.git
+  GIT_REPOSITORY https://github.com/rukhov/siglib.git
   GIT_TAG        origin/main
 )
 
