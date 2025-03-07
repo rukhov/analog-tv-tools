@@ -1,6 +1,6 @@
-# ATV Tools project
+# Analog TV Tools project
 
-The tools for decoding the analogue TV signals. NTSC and PAL standards are actually supported.
+The tools for decoding the analogue TV signals. 
 
 ## Build
 
@@ -14,19 +14,11 @@ Prerequisites:
 ### Ubuntu Build
 Be sure you have installed all of those:
 ```
-sudo apt install bizon
-sudo apt install libx11-dev libxft-dev
-sudo apt-get install autoconf
-sudo apt-get install libtool
-sudo apt-get install bison
-sudo apt-get install gperf
-sudo apt-get install libgles2-mesa-dev
-sudo apt install libxext-dev
-sudo apt install libxrandr-dev
-sudo apt-get install libxi-dev
-sudo apt-get install libxcursor-dev
-sudo apt-get install libxdamage-dev
-sudo apt-get install libxinerama-dev
+sudo apt-get update
+sudo apt-get install autoconf automake pkg-config autoconf-archive
+sudo apt-get install liburing-dev libx11-dev libxft-dev libtool bison gperf libgles2-mesa-dev libxext-dev libxrandr-dev libxi-dev 
+sudo apt-get install libxcursor-dev libxdamage-dev libxinerama-dev libltdl-dev libxtst-dev doxygen gnuradio gnuradio-dev
+sudo pip3 install pytest
 ```
 ##
 Copyright &copy; 2025 Roman Ukhov
