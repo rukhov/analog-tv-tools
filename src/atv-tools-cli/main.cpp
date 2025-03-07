@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
                             size_t rect_height,
                             size_t total_width,
                             size_t total_height) {
-            std::cout << std::format("Frame: {}\r", frameNum);
+            std::cout << std::format("Frame: {}\r", frameNum) << std::flush;
 
             if (writer) {
                 timer timer;

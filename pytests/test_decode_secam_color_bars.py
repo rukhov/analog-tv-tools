@@ -13,7 +13,7 @@ def test_decode(decoderPath):
 
         tmpFolder = Path('/tmp')
         sourceDir = os.path.dirname(Path(__file__).resolve())
-        inputFile = Path( sourceDir + '/../test-data/cvbs-secam-color-bars.i16')
+        inputFile = Path( sourceDir + '/../test-data/cvbs-secam-color-bars.f32')
         cvbsDataFile = inputFile
         aviOutputFile = tmpFolder.joinpath(inputFile.stem).with_suffix(".avi")
         jpegOutputFileBase = tmpFolder.joinpath(inputFile.stem)
@@ -29,7 +29,7 @@ def test_decode(decoderPath):
                 " --output-file " + str(aviOutputFile) +
                 " --sample-rate 16000000"
                 " --dc-correction .0"
-                " --amplification 1."
+                " --amplification 1.333"
                 " --max-frames 0"
                 )
         
