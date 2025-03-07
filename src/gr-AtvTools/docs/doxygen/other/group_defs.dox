@@ -1,6 +1,0 @@
-/*!
- * \defgroup block GNU Radio ATVTOOLS C++ Signal Processing Blocks
- * \brief All C++ blocks that can be used from the ATVTOOLS GNU Radio
- *        module are listed here or in the subcategories below.
- *
- */

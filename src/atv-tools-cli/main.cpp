@@ -25,9 +25,9 @@ int main(int argc, char* argv[])
 
         options opts = read_options(argc, argv);
 
-        auto const decoder_opts = atv::decoder::make_params(opts.standard);
+        auto const decoder_opts = atv::standard::make(opts.standard);
 
-        opts.processing_sample_rate_hz = decoder_opts.chroma_band_center_hz * 8;
+        opts.processing_sample_rate_hz = decoder_opts.chroma_subcarrier1_hz * 8;
 
         std::unique_ptr<dsp::processor<float>> reader;
         std::unique_ptr<dsp::processor<float>> demodulator;

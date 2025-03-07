@@ -45,7 +45,7 @@ public:
                                                              : 135. / 360.),
           _high_pass(dsp::hz2rel_frq(
               samp_rate,
-              (standard.chroma_band_center_hz - standard.chroma_band_width_hz / 2))),
+              (standard.chroma_subcarrier1_hz - standard.chroma_band_width_hz / 2))),
           _luma_comb_filter(8),
           _luma_delay(dsp::usec2samples(samp_rate, .6)),
           _color_extractor(make_color_extractor(standard, samp_rate))
@@ -62,9 +62,16 @@ public:
 
         auto chroma_buff = _high_pass.process(inCVBS);
         auto luma_filtered_buff = _luma_comb_filter.process(inCVBS);
-        _color_extractor->process({ chroma_buff.data(), size_t(inCVBS.size()) },
-                                  tags,
-                                  { _buffer.data(), inCVBS.size() });
+
+        if (_color_extractor)
+            _color_extractor->process({ chroma_buff.data(), size_t(inCVBS.size()) },
+                                      tags,
+                                      { _buffer.data(), inCVBS.size() });
+        else {
+            for (size_t i = 0; i < luma_filtered_buff.size(); ++i) {
+                _buffer[i].y = luma_filtered_buff[i];
+            }
+        }
 
 
         auto cvbs = inCVBS.data();

@@ -11,8 +11,6 @@ class decoder
 public:
     virtual ~decoder() = default;
 
-    static standard make_params(standard_e);
-
     virtual void process(uint64_t length,
                          float const* input,
                          short* video_yout = nullptr,

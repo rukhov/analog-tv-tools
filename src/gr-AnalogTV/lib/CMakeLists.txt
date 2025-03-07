@@ -11,6 +11,10 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
+set(CMAKE_CXX_STANDARD_REQUIRED On)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_EXTENSIONS Off)
+
 list(APPEND AnalogTV_sources
     TvDecode_impl.cc)
 
@@ -23,7 +27,10 @@ if(NOT AnalogTV_sources)
 endif(NOT AnalogTV_sources)
 
 add_library(gnuradio-AnalogTV SHARED ${AnalogTV_sources})
-target_link_libraries(gnuradio-AnalogTV gnuradio::gnuradio-runtime)
+target_link_libraries(gnuradio-AnalogTV 
+    PRIVATE gnuradio::gnuradio-runtime
+    PRIVATE lib-atv-tools
+)
 target_include_directories(
     gnuradio-AnalogTV
     PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>

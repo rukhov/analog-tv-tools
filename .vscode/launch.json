@@ -6,6 +6,22 @@
     "version": "0.2.0",
     "configurations": [
     {
+        "name": "Linux - debug GRC test",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "/usr/bin/python3",
+        "args": ["-u", "/home/rukhov/projects/analog-tv-tools/tests/test_secam.py"],
+        "stopAtEntry": false,
+        "cwd": "/home/rukhov/projects/analog-tv-tools/tests",
+        "environment": 
+            [
+                {"name": "LD_LIBRARY_PATH", "value": "/home/rukhov/projects/analog-tv-tools/build/src/gr-AnalogTV/lib"}, 
+                {"name": "GRC_BLOCKS_PATH", "value": "/home/rukhov/projects/analog-tv-tools/analog-tv-tools/src/gr-AnalogTV/grc"},
+                {"name": "PYTHONPATH", "value": "/home/rukhov/projects/analog-tv-tools/install/lib/python3.12/dist-packages"}
+            ],
+        "externalConsole": true
+    },
+    {
         "preLaunchTask": "CopyBins",
         "name": "(windows) debug GRC test",
         "type": "cppvsdbg",

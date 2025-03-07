@@ -2,13 +2,14 @@
 
 namespace atv {
 
-enum class standard_e { NTSC = 0, PAL };
+enum class standard_e { SECAM = 0, NTSC = 1, PAL = 2 };
 
 struct standard {
     standard_e standard;
     size_t total_line_count;
     bool interlaced;
-    double chroma_band_center_hz;
+    double chroma_subcarrier1_hz;
+    double chroma_subcarrier2_hz;
     double chroma_band_width_hz;
     double H_us;
     double timing_tolerance_us;
@@ -19,5 +20,8 @@ struct standard {
     double h_ref_point_to_burst_styart_us;
     double pre_equalisation_pulse_length_us;
     double vertical_serration_pulse_length_us;
+
+    static atv::standard make(standard_e);
 };
+
 } // namespace atv
