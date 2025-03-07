@@ -21,7 +21,7 @@ int main(int argc, char* argv[])
     timer::clock_t::duration video_encode_duration = {};
 
     try {
-        std::cout << std::format("Analogue TV decoding tools.");
+        std::cout << std::format("Analogue TV decoding tools.\n");
 
         options opts = read_options(argc, argv);
 
@@ -58,7 +58,8 @@ int main(int argc, char* argv[])
             resampler = std::make_unique<dsp::resampler>(opts.input_sample_rate_hz,
                                                          opts.processing_sample_rate_hz);
 
-            std::cout << std::format("Resampling to: {}", opts.processing_sample_rate_hz);
+            std::cout << std::format("Resampling to: {}\n",
+                                     opts.processing_sample_rate_hz);
         }
 
         bool b_Stop = false;
@@ -90,7 +91,7 @@ int main(int argc, char* argv[])
         auto decoder =
             atv::decoder::make(decoder_opts, opts.processing_sample_rate_hz, frame_cb);
 
-        std::cout << std::format("Start processing.");
+        std::cout << std::format("Start processing.\n");
 
         for (;;) {
 
@@ -127,7 +128,7 @@ int main(int argc, char* argv[])
 
         std::cout << std::format(
             "Done. ==================\nTotal frame number: {}\nProductivity: "
-            "{:0.2f} FPS.",
+            "{:0.2f} FPS.\n",
             frameNum,
             frameNum > 0 ? (1. * 1000 /
                             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -136,7 +137,7 @@ int main(int argc, char* argv[])
                          : (0.));
 
     } catch (std::exception const& e) {
-        std::cerr << std::format("Unhandled exception: {}", e.what());
+        std::cerr << std::format("Unhandled exception: {}\n", e.what());
     }
 
     return 0;

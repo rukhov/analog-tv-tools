@@ -42,7 +42,7 @@ options read_options(int argc, char* argv[])
         (SAMPLE_RATE_OPTION, po::value<double>(), "input sample rate, Hz")           //
         (STANDARD_OPTION,
          po::value<std::string>(),
-         "define TV signal standard (ntsc, pal)")                              //
+         "define TV signal standard (secam, ntsc, pal)")                       //
         (AMPLIFICATION_OPTION, po::value<double>(), "Amplification, ex. 0.5")  //
         (DC_CORRECTION_OPTION, po::value<double>(), "DC correction, ex. -1.5") //
         (MAX_FRAME_NUMBER_OPTION,
@@ -68,7 +68,7 @@ options read_options(int argc, char* argv[])
             opts.input_type = options::in_type::RAW;
         else
             opts.input_type = options::in_type::AUTO;
-        std::cout << std::format("input file type\t: '{}'", (int)opts.input_type);
+        std::cout << std::format("input file type\t: '{}'\n", (int)opts.input_type);
     }
 
     if (vm.count(INPUT_DATA_TYPE_OPTION)) {
@@ -78,9 +78,10 @@ options read_options(int argc, char* argv[])
         else if (it == "fm")
             opts.input_data_type = options::in_data_type::fm;
         else
-            throw std::runtime_error(std::format("Data type <{}> is not supported.", it));
+            throw std::runtime_error(
+                std::format("Data type <{}> is not supported.\n", it));
 
-        std::cout << std::format("input data type\t: '{}'", it);
+        std::cout << std::format("input data type\t: '{}'\n", it);
     }
 
     if (vm.count(OUTPUT_TYPE_OPTION)) {
@@ -89,58 +90,63 @@ options read_options(int argc, char* argv[])
             opts.output_type = options::out_type::RAW;
         else
             opts.output_type = options::out_type::AVI;
-        std::cout << std::format("output file type\t: '{}'", (int)opts.output_type);
+        std::cout << std::format("output file type\t: '{}'\n", (int)opts.output_type);
     }
 
     if (vm.count(STANDARD_OPTION)) {
         auto st = vm[STANDARD_OPTION].as<std::string>();
         if (st == "pal")
             opts.standard = atv::standard_e::PAL;
+        else if (st == "secam")
+            opts.standard = atv::standard_e::SECAM;
         else
             opts.standard = atv::standard_e::NTSC;
-        std::cout << std::format("Standard\t: {}", (int)opts.standard);
+        std::cout << std::format("Standard\t: {}\n", (int)opts.standard);
+        if (opts.standard != atv::standard_e::SECAM)
+            throw std::runtime_error(
+                std::format("Standard <{}> is not supported yet.\n", st));
     }
 
     if (vm.count(INPUT_FILE_OPTION)) {
         opts.input_file = vm[INPUT_FILE_OPTION].as<std::string>();
-        std::cout << std::format("Input file\t: '{}'", opts.input_file.string());
+        std::cout << std::format("Input file\t: '{}'\n", opts.input_file.string());
     }
 
     if (vm.count(OUTPUT_FILE_OPTION)) {
         opts.output_file = vm[OUTPUT_FILE_OPTION].as<std::string>();
-        std::cout << std::format("Output file\t: '{}'", opts.output_file.string());
+        std::cout << std::format("Output file\t: '{}'\n", opts.output_file.string());
     }
 
     if (vm.count(OUT_CVBS_RAW_FILE_OPTION)) {
         opts.out_cvbs_raw_file = vm[OUT_CVBS_RAW_FILE_OPTION].as<std::string>();
-        std::cout << std::format("Output cvbs RAW file\t: '{}'",
+        std::cout << std::format("Output cvbs RAW file\t: '{}'\n",
                                  opts.out_cvbs_raw_file.string());
     }
 
     if (vm.count(AMPLIFICATION_OPTION)) {
         opts.amplification = vm[AMPLIFICATION_OPTION].as<double>();
-        std::cout << std::format("Amplification\t: {}", opts.amplification);
+        std::cout << std::format("Amplification\t: {}\n", opts.amplification);
     }
 
     if (vm.count(DC_CORRECTION_OPTION)) {
         opts.dc_correction = vm[DC_CORRECTION_OPTION].as<double>();
-        std::cout << std::format("DC correction\t: {}", opts.dc_correction);
+        std::cout << std::format("DC correction\t: {}\n", opts.dc_correction);
     }
 
     if (vm.count(SAMPLE_RATE_OPTION)) {
         opts.input_sample_rate_hz = vm[SAMPLE_RATE_OPTION].as<double>();
-        std::cout << std::format("Sample Rate\t: {}", opts.input_sample_rate_hz);
+        std::cout << std::format("Sample Rate\t: {}\n", opts.input_sample_rate_hz);
     }
 
     if (vm.count(BASEBAND_CARRIER_FREQUENCY_OPTION)) {
         opts.carrier_frequency_hz = vm[BASEBAND_CARRIER_FREQUENCY_OPTION].as<double>();
-        std::cout << std::format("Baseband carrier frequency\t: {}",
+        std::cout << std::format("Baseband carrier frequency\t: {}\n",
                                  opts.carrier_frequency_hz);
     }
 
     if (vm.count(MAX_FRAME_NUMBER_OPTION)) {
         opts.max_frame_number = vm[MAX_FRAME_NUMBER_OPTION].as<uint64_t>();
-        std::cout << std::format("Maximum frames\t: {}", opts.max_frame_number);
+        std::cout << std::format("Maximum frames\t: {}\n", opts.max_frame_number);
     }
 
     return opts;

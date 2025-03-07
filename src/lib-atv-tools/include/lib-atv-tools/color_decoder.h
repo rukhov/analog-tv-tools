@@ -11,21 +11,18 @@
 
 #include "color.h"
 #include "cvbs.h"
+#include "secam_color_extractor.h"
 #include "standard.h"
 
 namespace atv {
-class color_extractor
-{
-public:
-    virtual ~color_extractor() = default;
-    virtual void process(std::span<float const> const& chroma,
-                         std::span<uint32_t> const& tags,
-                         std::span<YUV> const& out_buff) = 0;
-};
 
 std::unique_ptr<color_extractor> make_color_extractor(standard const& standard,
                                                       uint64_t samp_rate)
 {
+    if (standard.standard == standard_e::SECAM) {
+        return std::make_unique<secam_color_extractor>();
+    }
+
     return {};
 }
 

@@ -50,3 +50,4 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(siglib)
 
 add_subdirectory(src)
+add_subdirectory(pytests)

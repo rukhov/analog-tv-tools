@@ -19,7 +19,36 @@
                 {"name": "GRC_BLOCKS_PATH", "value": "/home/rukhov/projects/analog-tv-tools/analog-tv-tools/src/gr-AnalogTV/grc"},
                 {"name": "PYTHONPATH", "value": "/home/rukhov/projects/analog-tv-tools/install/lib/python3.12/dist-packages"}
             ],
-        "externalConsole": true
+        "externalConsole": false
+    },
+    {
+        "name": "Linux - Debug CLI",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/atv-tools-cli/atv-tools-cli",
+        "args": [
+            "--input-type", "raw",
+            "--input-data-type", "cvbs",
+            "--output-type", "avi",
+            "--standard", "secam",
+            "--input-file", "${workspaceFolder}/test-data/cvbs-secam-color-bars.i16",
+            "--output-file", "/tmp/cvbs-secam-color-bars.i16.avi",
+            "--sample-rate", "16000000",
+            "--dc-correction", "0",
+            "--amplification", "1",
+            "--max-frames", "0",
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/atv-tools-cli",
+        "externalConsole": true,
+        "avoidWindowsConsoleRedirection": true,
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ]
     },
     {
         "preLaunchTask": "CopyBins",
