@@ -2,8 +2,8 @@ include(FetchContent)
 
 FetchContent_Declare(
   liquid-dsp
-  GIT_REPOSITORY https://github.com/jgaeddert/liquid-dsp.git
-  GIT_TAG        v1.7.0
+  GIT_REPOSITORY https://github.com/rukhov/liquid-dsp.git
+  GIT_TAG        windows-build
   CMAKE_ARGS
         -DBUILD_EXAMPLES=OFF
         -DBUILD_AUTOTESTS=OFF
