@@ -19,8 +19,6 @@ target_sources(${TARGET_NAME} PRIVATE
 
 set(LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
 
-message("----------------> LIB_DIR: " ${LIB_DIR})
-
 if(UNIX)
 	target_link_libraries(${TARGET_NAME} 
 		PUBLIC siglib
