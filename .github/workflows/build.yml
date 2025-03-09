@@ -39,7 +39,7 @@ jobs:
         if: ${{ matrix.platform == 'windows' }}
         run: |
           pip3 install pytest
-          scripts/windows/start.dialog.prevention.cmd
+          Start-Process powershell -ArgumentList "-File scripts/windows/kill-dialogs.ps1"
 
       - name: Checkout
         uses: actions/checkout@v4
