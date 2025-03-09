@@ -39,6 +39,7 @@ jobs:
         if: ${{ matrix.platform == 'windows' }}
         run: |
           pip3 install pytest
+          scripts/windows/start.dialog.prevention.cmd
 
       - name: Checkout
         uses: actions/checkout@v4
