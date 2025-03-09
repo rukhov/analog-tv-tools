@@ -13,9 +13,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-2025]
+        os: [ubuntu-latest, windows-2019]
         include:
-          - os: windows-2025
+          - os: windows-2019
             platform: windows
             arch: x64
             build_gnurado_blocks: OFF
