@@ -20,7 +20,7 @@ std::unique_ptr<color_extractor> make_color_extractor(standard const& standard,
                                                       uint64_t samp_rate)
 {
     if (standard.standard == standard_e::SECAM) {
-        return std::make_unique<secam_color_extractor>();
+        return std::make_unique<secam_color_extractor>(samp_rate);
     }
 
     return {};
