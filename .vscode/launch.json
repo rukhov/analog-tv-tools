@@ -52,25 +52,6 @@
         ]
     },
     {
-        "name": "Linux - Debug Uint Tests",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/../build/src/utest/atv-tools_unit_tests",
-        "args": [
-        ],
-        "stopAtEntry": false,
-        "cwd": "${workspaceFolder}/../build/src/utest",
-        "externalConsole": true,
-        "avoidWindowsConsoleRedirection": true,
-        "setupCommands": [
-            {
-                "description": "Enable pretty-printing for gdb",
-                "text": "-enable-pretty-printing",
-                "ignoreFailures": true
-            }
-        ]
-    },
-    {
         "preLaunchTask": "CopyBins",
         "name": "(windows) debug GRC test",
         "type": "cppvsdbg",

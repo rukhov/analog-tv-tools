@@ -7,9 +7,7 @@ project(atv-tools VERSION 1.0.0 LANGUAGES CXX C)
 option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" ON)
 
 enable_testing()
-
-include(cmake/FindSiglib.cmake)
-include(cmake/FindLiquidDsp.cmake)
+include(FetchContent)
 
 set(VCPKG_TARGET_ARCHITECTURE x64)
 set(VCPKG_CRT_LINKAGE dynamic)
@@ -42,6 +40,14 @@ string(REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELW
 string(REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
 
 add_compile_options( -DSIGLIB_DATA_FLOAT=1 )
+
+FetchContent_Declare(
+  siglib
+  GIT_REPOSITORY https://github.com/rukhov/siglib.git
+  GIT_TAG        origin/main
+)
+
+FetchContent_MakeAvailable(siglib)
 
 add_subdirectory(src)
 add_subdirectory(pytests)
