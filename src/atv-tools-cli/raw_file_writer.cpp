@@ -18,10 +18,11 @@ public:
     ~raw_file_writer() {}
     // processor<float>
 private:
-    span process(span const& buff) override
+    dsp::processor<float>::out_span_t
+    process(dsp::processor<float>::in_span_t const& buff) override
     {
         _o.write(reinterpret_cast<char const*>(buff.data()), buff.size() * sizeof(float));
-        return buff;
+        return {};
     }
 };
 } // namespace

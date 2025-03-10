@@ -3,6 +3,7 @@
 #endif
 #include <cassert>
 #include <cmath>
+#include <complex>
 #include <functional>
 #include <iostream>
 #include <memory>

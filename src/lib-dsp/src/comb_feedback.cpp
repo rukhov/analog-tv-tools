@@ -27,4 +27,17 @@ float comb_feedback::process(float s)
 
     return state();
 }
+
+std::span<float> comb_feedback::process(std::span<const float> const& data)
+{
+    if (_buffer.size() < data.size()) {
+        _buffer.resize(data.size());
+    }
+
+    for (size_t i = 0; i < data.size(); ++i) {
+        _buffer[i] = process(data[i]);
+    }
+
+    return { _buffer.data(), data.size() };
+}
 } // namespace dsp

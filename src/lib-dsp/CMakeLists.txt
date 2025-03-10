@@ -24,6 +24,7 @@ if(UNIX)
 		PUBLIC siglib
 		PUBLIC Boost::circular_buffer 
 		PUBLIC ${LIB_DIR}/libsoxr.a
+		PRIVATE  iir::iir_static
 	)
 	target_compile_options(${TARGET_NAME} 
 		PRIVATE -fPIC

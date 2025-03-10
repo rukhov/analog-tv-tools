@@ -2,12 +2,12 @@
 
 namespace dsp {
 
-template <typename InT, typename OutT = InT>
+template <typename InT, typename OutT = std::remove_cv_t<InT>>
 class processor
 {
 public:
-    using in_span_t = std::span<InT>;
-    using out_span_t = std::span<OutT>;
+    using in_span_t = std::span<const InT>;
+    using out_span_t = std::span<std::remove_cv_t<OutT>>;
     using span = in_span_t;
 
     virtual ~processor() = default;

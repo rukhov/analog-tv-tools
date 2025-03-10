@@ -13,12 +13,12 @@ standard standard::make(standard_e standard)
         constexpr auto Fv = 2 * Fh / Nline;
         constexpr auto V_us = 1000000 / Fv;
         constexpr auto H_us = 1000000 / Fh;
-        return { .standard = atv::standard_e::PAL,
+        return { .standard = atv::standard_e::SECAM,
                  .total_line_count = Nline,
                  .interlaced = true,
-                 .chroma_subcarrier1_hz = 4406250.,
-                 .chroma_subcarrier2_hz = 4250000.,
-                 .chroma_band_width_hz = 1800000.,
+                 .chroma_subcarrier1_hz = 4250000.,
+                 .chroma_subcarrier2_hz = 4406250.,
+                 .chroma_band_width_hz = 1168250.,
                  .H_us = H_us,
                  .timing_tolerance_us = 1.2,
                  .chroma_burst_duration_us = 2.25,

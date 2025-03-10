@@ -11,10 +11,13 @@ class resampler : public dsp::processor<float>
     const double _ratio;
 
 public:
+    using in_span_t = processor<float>::in_span_t;
+    using out_span_t = processor<float>::out_span_t;
+
     resampler(double isr, double osr);
     ~resampler();
 
     float state() const { return {}; }
-    span process(span const& data);
+    out_span_t process(in_span_t const& data);
 };
 } // namespace dsp

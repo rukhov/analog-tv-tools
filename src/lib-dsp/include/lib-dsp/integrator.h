@@ -18,5 +18,13 @@ public:
         _state += (s - _state) * _tau;
         return _state;
     }
+
+    std::span<T> process_inplace(std::span<T> const& s)
+    {
+        for (auto& v : s) {
+            v = process(v);
+        }
+        return s;
+    }
 };
 } // namespace dsp

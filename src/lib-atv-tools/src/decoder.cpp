@@ -96,7 +96,13 @@ private:
                 *vout = pixel.Cr;
             }
 
+            if (luma_out) {
+                *lout = yuv->y;
+                //*lout = *in;
+            }
+
             if (dbg1) {
+                *d1out = yuv->u;
                 //*bout2 = 0;
                 //*d1out = (*tag) & (cvbs_tag::vsync_odd | cvbs_tag::vsync_even);
                 //*d1out = pd_debug1;
@@ -107,6 +113,7 @@ private:
             }
 
             if (dbg2) {
+                *d2out = yuv->v;
                 //*d2out = (*tag) & cvbs_tag::color_burst;
             }
 
