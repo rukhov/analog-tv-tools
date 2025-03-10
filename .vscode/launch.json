@@ -71,25 +71,6 @@
         ]
     },
     {
-        "name": "Windows - Debug Unit Tests",
-        "type": "cppvsdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/../build/src/utest/RelWithDebInfo/analog-tv-tools_unit_tests.exe",
-        "args": [
-        ],
-        "stopAtEntry": false,
-        "cwd": "${workspaceFolder}/../build/src/utest/RelWithDebInfo",
-        "externalConsole": false,
-        "avoidWindowsConsoleRedirection": true,
-        "setupCommands": [
-            {
-                "description": "Enable pretty-printing for gdb",
-                "text": "-enable-pretty-printing",
-                "ignoreFailures": true
-            }
-        ]
-    },
-    {
         "preLaunchTask": "CopyBins",
         "name": "(windows) debug GRC test",
         "type": "cppvsdbg",
