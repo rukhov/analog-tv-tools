@@ -7,6 +7,7 @@ class snd_file_reader_impl : public dsp::processor<float>
     SNDFILE* _file = nullptr;
     uint64_t _total_read = 0;
     SF_INFO _info = {};
+    std::vector<float> _buffer;
 
 public:
     snd_file_reader_impl(std::filesystem::path const& path)
@@ -29,13 +30,17 @@ public:
     ~snd_file_reader_impl() { sf_close(_file); }
     // processor<float>
 private:
-    span process(span const& buff) override
+    dsp::processor<float>::out_span_t
+    process(dsp::processor<float>::in_span_t const& buff) override
     {
+        if (_buffer.size() < buff.size())
+            _buffer.resize(buff.size());
+
         size_t readCount =
-            sf_readf_float(_file, buff.data(), buff.size() / _info.channels);
+            sf_readf_float(_file, _buffer.data(), buff.size() / _info.channels);
         readCount *= _info.channels;
         _total_read += readCount;
-        return { buff.data(), readCount };
+        return { _buffer.data(), readCount };
     }
 };
 } // namespace

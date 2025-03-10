@@ -6,6 +6,7 @@ class raw_file_reader : public dsp::processor<float>
 {
     uint64_t _total_written = 0;
     std::ifstream _i;
+    std::vector<float> _buffer;
 
 public:
     raw_file_reader(std::filesystem::path const& path)
@@ -18,11 +19,15 @@ public:
     ~raw_file_reader() {}
     // processor<float>
 private:
-    span process(span const& buff) override
+    dsp::processor<float>::out_span_t
+    process(dsp::processor<float>::in_span_t const& buff) override
     {
-        _i.read(reinterpret_cast<char*>(buff.data()), buff.size() * sizeof(float));
+        if (_buffer.size() < buff.size())
+            _buffer.resize(buff.size());
 
-        return { buff.data(), _i.gcount() / sizeof(float) };
+        _i.read(reinterpret_cast<char*>(_buffer.data()), buff.size() * sizeof(float));
+
+        return { _buffer.data(), _i.gcount() / sizeof(float) };
     }
 };
 } // namespace

@@ -4,9 +4,9 @@ namespace dsp {
 
 class iir_band_pass
 {
-    int32_t stage_number_;
-    std::vector<float> IIRCoeffs_;
-    std::vector<float> FilterState_;
+    const int32_t _stage_number;
+    std::vector<float> _IIRCoeffs;
+    std::vector<float> _FilterState;
     std::vector<float> _buffer;
     float _state = 0;
 

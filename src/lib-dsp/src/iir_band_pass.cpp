@@ -45,21 +45,38 @@ inline std::tuple<std::vector<SLData_t>, SLFixData_t> InitCoeffs(double cutoff_f
 
     return std::make_tuple(dstCoefs, STAGE_NUMBER);
 }
+
+inline std::vector<SLData_t> InitBandPass(double cutoff_frequency1,
+                                          double cutoff_frequency2)
+{
+    std::vector<SLData_t> coeffs(SIGLIB_IIR_COEFFS_PER_BIQUAD);
+
+    SIF_IirBandPassFilterConstantSkirtGain(
+        coeffs.data(), cutoff_frequency1, cutoff_frequency2);
+
+    return coeffs;
+}
+
+
 } // namespace
 
 namespace dsp {
 
 iir_band_pass::iir_band_pass(double cutoff_frequency1, double cutoff_frequency2)
+    : _stage_number(1), _IIRCoeffs(_stage_number * SIGLIB_IIR_COEFFS_PER_BIQUAD)
 {
-    auto [IIRCoeffs, stage_number] = InitCoeffs(cutoff_frequency1);
+    auto IIRCoeffs = InitBandPass(cutoff_frequency1, cutoff_frequency2);
 
-    IIRCoeffs_ = std::move(IIRCoeffs);
-    stage_number_ = stage_number;
+    for (size_t i = 0; i < _stage_number; ++i) {
+        for (size_t j = 0; j < SIGLIB_IIR_COEFFS_PER_BIQUAD; ++j) {
+            _IIRCoeffs[i * SIGLIB_IIR_COEFFS_PER_BIQUAD + j] = IIRCoeffs[j];
+        }
+    }
 
-    FilterState_.resize((stage_number_) * 2);
+    _FilterState.resize((_stage_number) * 2);
 
-    SIF_Iir(FilterState_.data(), // Pointer to filter state array
-            stage_number_);      // Number of second order stages
+    SIF_Iir(_FilterState.data(), // Pointer to filter state array
+            _stage_number);      // Number of second order stages
 }
 
 float iir_band_pass::process(float s)
@@ -67,9 +84,9 @@ float iir_band_pass::process(float s)
     // Apply iir filter and store filtered data
     _state = static_cast<float>(
         SDS_Iir(s,                   // const SLData_t, Input sample to be filtered
-                FilterState_.data(), // SLData_t *, Pointer to filter state array
-                IIRCoeffs_.data(),   // const SLData_t *, Pointer to filter coefficients
-                stage_number_        // const SLArrayIndex_t) Number of biquad
+                _FilterState.data(), // SLData_t *, Pointer to filter state array
+                _IIRCoeffs.data(),   // const SLData_t *, Pointer to filter coefficients
+                _stage_number        // const SLArrayIndex_t) Number of biquad
                 ));
 
     return _state;
@@ -82,9 +99,9 @@ std::span<float> iir_band_pass::process(std::span<float const> const& s)
     // Apply iir filter and store filtered data
     SDA_Iir(s.data(),
             _buffer.data(),
-            FilterState_.data(), // SLData_t *, Pointer to filter state array
-            IIRCoeffs_.data(),   // const SLData_t *, Pointer to filter coefficients
-            stage_number_,       // const SLArrayIndex_t) Number of biquad
+            _FilterState.data(), // SLData_t *, Pointer to filter state array
+            _IIRCoeffs.data(),   // const SLData_t *, Pointer to filter coefficients
+            _stage_number,       // const SLArrayIndex_t) Number of biquad
             s.size());
 
     return { _buffer.data(), s.size() };

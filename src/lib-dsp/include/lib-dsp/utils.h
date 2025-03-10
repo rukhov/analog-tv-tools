@@ -24,8 +24,7 @@ inline double relTimeSec(double samp_rate, double sec) { return 1 / (sec * samp_
 template <typename T>
 inline T normalize_phase(T const& p)
 {
-    T phase_;
-    phase_ = std::modf(p, &phase_);
+    T phase_ = std::modf(p, &phase_);
     while (phase_ < .0) {
         phase_ += 1.;
     }

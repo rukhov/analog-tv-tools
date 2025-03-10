@@ -36,7 +36,7 @@ resampler::resampler(double isr, double osr)
 }
 resampler::~resampler() { soxr_delete((soxr_t)_resampler); }
 
-std::span<float> resampler::process(std::span<float> const& data)
+resampler::out_span_t resampler::process(resampler::in_span_t const& data)
 {
     size_t inIdx = 0;
     size_t outIdx = 0;

@@ -26,7 +26,7 @@ public:
     }
 
 private:
-    span process(span const& in) override
+    out_span_t process(in_span_t const& in) override
     {
         auto data = _float2complex.process(in);
         auto const out_start = reinterpret_cast<float*>(data.data());

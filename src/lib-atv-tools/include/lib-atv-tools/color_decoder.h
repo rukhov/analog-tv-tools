@@ -32,7 +32,7 @@ class color_decoder
     dsp::iir_high_pass _high_pass;
     std::unique_ptr<color_extractor> _color_extractor;
     dsp::delay<float> _luma_delay;
-    dsp::comb_feedforward _luma_comb_filter;
+    dsp::iir_low_pass _luma_low_pass;
     bool _sync = false;
     std::vector<YUV> _buffer;
 
@@ -43,27 +43,25 @@ public:
           _high_pass(dsp::hz2rel_frq(
               samp_rate,
               (standard.chroma_subcarrier1_hz - standard.chroma_band_width_hz / 2))),
-          _luma_comb_filter(8),
-          _luma_delay(dsp::usec2samples(samp_rate, .6)),
+          _luma_low_pass(.08),
+          _luma_delay(dsp::usec2samples(samp_rate, .7)),
           _color_extractor(make_color_extractor(standard, samp_rate))
     {
     }
 
     YUV state() const { return {}; }
 
-    std::span<YUV> process(std::span<float const> const& inCVBS,
+    std::span<YUV> process(std::span<const float> const& inCVBS,
                            std::span<uint32_t> const& tags)
     {
         if (_buffer.size() < inCVBS.size())
             _buffer.resize(inCVBS.size());
 
-        auto chroma_buff = _high_pass.process(inCVBS);
-        auto luma_filtered_buff = _luma_comb_filter.process(inCVBS);
+        // auto chroma_buff = _high_pass.process(inCVBS);
+        auto luma_filtered_buff = _luma_low_pass.process(inCVBS);
 
         if (_color_extractor)
-            _color_extractor->process({ chroma_buff.data(), size_t(inCVBS.size()) },
-                                      tags,
-                                      { _buffer.data(), inCVBS.size() });
+            _color_extractor->process(inCVBS, tags, { _buffer.data(), inCVBS.size() });
         else {
             for (size_t i = 0; i < luma_filtered_buff.size(); ++i) {
                 _buffer[i].y = luma_filtered_buff[i];
@@ -78,9 +76,11 @@ public:
 
         for (; cvbs != cvbs_end; ++cvbs, ++out, ++luma) {
 
-            out->y = _luma_delay.process(*luma);
-            auto rgb = atv::Yuv2Rgb(*out);
-            *out = Rgb2Yuv(rgb.fix());
+            // out->y = _luma_delay.process(*luma);
+            out->y = *cvbs;
+            // out->y = *luma;
+            // auto rgb = atv::Yuv2Rgb(*out);
+            //*out = Rgb2Yuv(rgb.fix());
         }
 
         return { _buffer.data(), inCVBS.size() };

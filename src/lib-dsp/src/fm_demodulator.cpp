@@ -10,22 +10,29 @@ template <typename T>
 class fm_demodulator : public processor<T>
 {
     T _prev_input = 0;
+    std::vector<T> _buffer;
 
 public:
+    using in_span_t = processor<T>::in_span_t;
+    using out_span_t = processor<T>::out_span_t;
+
     fm_demodulator() {}
 
     // processor<T>
 private:
     T process(T s) override { return s; }
-    std::span<T> process(std::span<T> const& data) override
+    out_span_t process(in_span_t const& data) override
     {
+        if (_buffer.size() < data.size())
+            _buffer.resize(data.size());
+
         for (size_t i = 0; i < data.size(); ++i) {
             auto prev = data[i];
-            data[i] = std::abs(data[i] - _prev_input);
-            data[i] *= DSP_2PI;
+            _buffer[i] = std::abs(data[i] - _prev_input);
+            _buffer[i] *= DSP_2PI;
             _prev_input = prev;
         }
-        return data;
+        return { _buffer.data(), data.size() };
     }
 };
 } // namespace

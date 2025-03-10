@@ -98,6 +98,7 @@ private:
 
             if (luma_out) {
                 *lout = yuv->y;
+                //*lout = *in;
             }
 
             if (dbg1) {
@@ -112,6 +113,7 @@ private:
             }
 
             if (dbg2) {
+                *d2out = yuv->v;
                 //*d2out = (*tag) & cvbs_tag::color_burst;
             }
 
