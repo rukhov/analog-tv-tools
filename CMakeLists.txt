@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.26)
 
-project(atv-tools VERSION 1.0.0 LANGUAGES CXX C)
+project(analog-tv-tools VERSION 1.0.0 LANGUAGES CXX C)
 
 option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" OFF)
 option(BUILD_PYTHON_TESTS "Build python tests" OFF)
@@ -38,15 +38,7 @@ string(REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELW
 string(REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
 
 include(cmake/FindSiglib.cmake)
-include(cmake/FindLiquidDsp.cmake)
-
-FetchContent_Declare(
-  siglib
-  GIT_REPOSITORY https://github.com/rukhov/siglib.git
-  GIT_TAG        origin/main
-)
-
-FetchContent_MakeAvailable(siglib)
+include(cmake/FindIir1.cmake)
 
 add_subdirectory(src)
 if(BUILD_PYTHON_TESTS)
