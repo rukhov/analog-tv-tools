@@ -1,23 +1,21 @@
 cmake_minimum_required(VERSION 3.26)
 
-#set(CMAKE_TOOLCHAIN_FILE $ENV{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake)
-
 project(atv-tools VERSION 1.0.0 LANGUAGES CXX C)
 
-option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" ON)
+option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" OFF)
+option(BUILD_PYTHON_TESTS "Build python tests" OFF)
 
 enable_testing()
-include(FetchContent)
 
 set(VCPKG_TARGET_ARCHITECTURE x64)
 set(VCPKG_CRT_LINKAGE dynamic)
 set(VCPKG_LIBRARY_LINKAGE dynamic)
 
+find_package(soxr)
 find_package(GTest REQUIRED)
 find_package(SndFile REQUIRED)
 find_package(Boost CONFIG REQUIRED COMPONENTS circular_buffer program_options)
 find_package(OpenCV REQUIRED)
-find_package(soxr)
 
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(CMAKE_CXX_STANDARD 23)
@@ -39,7 +37,8 @@ endif()
 string(REPLACE "/O2" "/Od" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
 string(REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RELWITHDEBINFO})
 
-add_compile_options( -DSIGLIB_DATA_FLOAT=1 )
+include(cmake/FindSiglib.cmake)
+include(cmake/FindLiquidDsp.cmake)
 
 FetchContent_Declare(
   siglib
@@ -50,4 +49,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(siglib)
 
 add_subdirectory(src)
-add_subdirectory(pytests)
+if(BUILD_PYTHON_TESTS)
+    add_subdirectory(pytests)
+endif()
