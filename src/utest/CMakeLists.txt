@@ -11,7 +11,7 @@ target_precompile_headers(${TARGET_NAME} PRIVATE stdafx.h)
 
 set(LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
 
-target_link_libraries(${TARGET_NAME} PRIVATE GTest::gtest GTest::gtest_main opencv_videoio iir::iir)
+target_link_libraries(${TARGET_NAME} PRIVATE GTest::gtest GTest::gtest_main opencv_videoio iir::iir_static)
 
 add_test(NAME "Unit tests" 
     COMMAND 
