@@ -52,6 +52,25 @@
         ]
     },
     {
+        "name": "Linux - Debug Unit Tests",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/src/utest/analog-tv-tools_unit_tests",
+        "args": [
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/src/utest",
+        "externalConsole": false,
+        "avoidWindowsConsoleRedirection": true,
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ]
+    },
+    {
         "preLaunchTask": "CopyBins",
         "name": "(windows) debug GRC test",
         "type": "cppvsdbg",
