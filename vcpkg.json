@@ -5,7 +5,6 @@
     "gtest",
     "opencv4",
     "libsndfile",
-    "soxr",
-    "iir1"
+    "soxr"
   ]
 }
