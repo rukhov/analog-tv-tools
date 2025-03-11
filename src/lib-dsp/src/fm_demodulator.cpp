@@ -1,6 +1,5 @@
-#include "../include/lib-dsp/fm_demodulator.h"
-
-#include "utils.h"
+#include "lib-dsp/fm_demodulator.h"
+#include "lib-dsp/utils.h"
 
 using namespace dsp;
 

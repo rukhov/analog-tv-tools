@@ -34,13 +34,14 @@ elseif(WIN32)
 		PUBLIC siglib
 		PUBLIC Boost::circular_buffer 
 		PUBLIC ${LIB_DIR}/soxr.lib
+		PRIVATE iir::iir_static
 	)
 endif()
 
 
 target_include_directories(${TARGET_NAME}
 	INTERFACE include 
-	PRIVATE include/lib-dsp 
+	PRIVATE include
 )
 
 target_compile_definitions(${TARGET_NAME}

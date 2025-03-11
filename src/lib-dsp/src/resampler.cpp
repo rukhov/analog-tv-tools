@@ -1,4 +1,5 @@
-#include "../lib-dsp/resampler.h"
+#include "lib-dsp/resampler.h"
+
 #include <soxr.h>
 
 namespace {
