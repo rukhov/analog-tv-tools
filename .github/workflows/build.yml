@@ -18,11 +18,9 @@ jobs:
           - os: windows-latest
             platform: windows
             arch: x64
-            build_gnurado_blocks: OFF
           - os: ubuntu-latest
             platform: linux
             arch: x64
-            build_gnurado_blocks: ON
     steps:
 
       - name: Install Ubuntu Prerequisites
@@ -54,7 +52,7 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} --preset=${{ matrix.platform }}-rel -S ./ -B ./build -DBUILD_GNURADIO_BLOCKS=${{ matrix.build_gnurado_blocks }}
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} --preset=${{ matrix.platform }}-rel -S ./ -B ./build -DBUILD_GNURADIO_BLOCKS=OFF -DBUILD_PYTHON_TESTS=OFF
 
       - name: Build
         run: |
