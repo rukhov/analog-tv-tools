@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.26)
 
 project(analog-tv-tools VERSION 1.0.0 LANGUAGES CXX C)
 
-option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" ON)
+option(BUILD_GNURADIO_BLOCKS "Build the gnuradio blocks" OFF)
 option(BUILD_PYTHON_TESTS "Build python tests" ON)
 
 enable_testing()
