@@ -4,8 +4,7 @@
 
 namespace dsp {
 
-template <typename T>
-std::unique_ptr<processor<T, std::complex<T>>>
-make_quadrature_demod(double currierFrequency);
+template <typename T, typename Tout = std::complex<T>>
+std::unique_ptr<processor<T, Tout>> make_quadrature_demod(double currierFrequency);
 
 } // namespace dsp

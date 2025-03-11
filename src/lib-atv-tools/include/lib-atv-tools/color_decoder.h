@@ -77,7 +77,7 @@ public:
         for (; cvbs != cvbs_end; ++cvbs, ++out, ++luma) {
 
             // out->y = _luma_delay.process(*luma);
-            out->y = *cvbs;
+            // out->y = *cvbs;
             // out->y = *luma;
             // auto rgb = atv::Yuv2Rgb(*out);
             //*out = Rgb2Yuv(rgb.fix());
