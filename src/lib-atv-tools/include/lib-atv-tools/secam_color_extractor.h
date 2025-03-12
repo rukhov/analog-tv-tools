@@ -18,8 +18,12 @@
 
 namespace {
 constexpr double c_heterodine_frq = .25;
-constexpr double c_db_deviation = 280000.;
+// constexpr double c_db_deviation = 280000.; constexpr double c_dr_deviation = 280000.;
+constexpr double c_db_deviation = 230000.;
 constexpr double c_dr_deviation = 280000.;
+
+const std::array<const float, 3> chroma_deemphasis_taps = { 0.3002, -0.2997, -0.9994 };
+
 } // namespace
 
 namespace atv {
@@ -37,8 +41,8 @@ class secam_color_extractor : public color_extractor
     dsp::comb_feedback _u_comb_feedback;
     dsp::comb_feedback _v_comb_feedback;
     std::vector<float> _color_buffer;
-    std::unique_ptr<dsp::processor<float>> _dbdr_low_pass;
-    std::unique_ptr<dsp::processor<float>> _luma_low_pass;
+    std::unique_ptr<dsp::processor<float>> _chroma_low_pass;
+    std::unique_ptr<dsp::processor<float>> _luma_band_stop;
     dsp::delay<float> _line_delay;
     bool _odd_line = false;
 
@@ -72,14 +76,15 @@ public:
                                  ((_standard.chroma_subcarrier2_hz) / samp_rate)),
           _db_color_value_scale(samp_rate / c_db_deviation),
           _dr_color_value_scale(samp_rate / c_dr_deviation),
-          _dbdr_low_pass(dsp::make_low_pass<float, 2>(220000. / samp_rate)),
+          _chroma_low_pass(dsp::make_low_pass<float, 1>(130000. / samp_rate)),
+          //_chroma_low_pass(dsp::make_direct<float>(chroma_deemphasis_taps)),
           _color_hilbert_transform(dsp::make_fir_hilbert_transform<float>(15)),
           _line_delay(dsp::usec2samples(samp_rate, _standard.H_us)),
           _u_comb_feedback(2),
           _v_comb_feedback(2),
-          _luma_low_pass(dsp::make_band_stop<float, 3>(
+          _luma_band_stop(dsp::make_band_stop<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
-              (_standard.chroma_band_width_hz + 1000000) / samp_rate))
+              (_standard.chroma_band_width_hz + 100000) / samp_rate))
     {
     }
     // color_extractor
@@ -91,7 +96,7 @@ private:
         if (_color_buffer.size() < chroma.size())
             _color_buffer.resize(chroma.size());
 
-        auto luma = _luma_low_pass->process(chroma);
+        auto luma = _luma_band_stop->process(chroma);
 
 
         auto u = _color_band_pass->process(chroma);
@@ -110,7 +115,9 @@ private:
             _color_buffer[i] = (quad[i].real());
         }
 
-        auto dbdr = _dbdr_low_pass->process({ _color_buffer.data(), chroma.size() });
+        auto dbdr = _chroma_low_pass->process({ _color_buffer.data(), chroma.size() });
+        //  auto dbdr = std::span<float>{ _color_buffer.data(), chroma.size() };
+        // auto dbdr = _chroma_low_pass->process({ chroma.data(), chroma.size() });
 
         for (auto i = 0; i < chroma.size(); ++i) {
 
@@ -138,7 +145,8 @@ private:
             out_buff[i] = YDbDr2Yuv(ydbdr);
             // out_buff[i].v = v[i];
             //  out_buff[i].u = -.5;
-            //  out_buff[i].v = .5;
+            // out_buff[i].u = 0;
+            // out_buff[i].v = dbdr[i];
         }
     }
 };

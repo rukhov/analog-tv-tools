@@ -4,6 +4,9 @@
 
 namespace dsp {
 
+template <typename T>
+std::unique_ptr<processor<T, T>> make_direct(std::span<const T> const& taps);
+
 template <typename T, size_t order>
 std::unique_ptr<processor<T, T>> make_band_pass(double centerFrequencyNormalised,
                                                 double bandWidthNormalised);

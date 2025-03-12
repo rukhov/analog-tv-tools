@@ -8,6 +8,7 @@
 #include <format>
 #include <iostream>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <tuple>
 #include <vector>
