@@ -1,6 +1,7 @@
 #if defined(NDEBUG)
 #undef NDEBUG
 #endif
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <complex>
