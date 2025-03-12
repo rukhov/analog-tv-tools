@@ -63,7 +63,6 @@ struct RGB {
 };
 
 struct YUV {
-    // y, u, v - 0..1
     float y;
     float u;
     float v;
@@ -121,5 +120,35 @@ inline RGB YCbCr2RGB(YCbCr const& ybr)
     RGB rgb = { uint8_t(R), uint8_t(G), uint8_t(B) };
     return rgb;
 }
+
+struct YDbDr {
+    float y;
+    float db;
+    float dr;
+};
+
+inline YDbDr Yuv2YDbDr(YUV const& yuv)
+{
+    // https://en.wikipedia.org/wiki/YDbDr
+    YDbDr retVal;
+
+    retVal.y = yuv.y;
+    retVal.db = 3.059 * yuv.u;
+    retVal.dr = -2.169 * yuv.v;
+
+    return retVal;
+};
+
+inline YUV YDbDr2Yuv(YDbDr const& ydbdr)
+{
+    // https://en.wikipedia.org/wiki/YDbDr
+    YUV retVal;
+
+    retVal.y = ydbdr.y;
+    retVal.u = ydbdr.db / 3.059;
+    retVal.v = ydbdr.dr / -2.169;
+
+    return retVal;
+};
 
 } // namespace atv

@@ -180,6 +180,8 @@ make_band_stop<float, 5>(double centerFrequencyNormalised, double bandWidthNorma
 
 namespace dsp {
 
+// High pass
+
 template <>
 std::unique_ptr<processor<std::complex<float>, std::complex<float>>>
 make_high_pass<std::complex<float>, 3>(double cutoffFrequencyNormalised)
@@ -196,11 +198,24 @@ make_high_pass<std::complex<float>, 5>(double cutoffFrequencyNormalised)
         cutoffFrequencyNormalised);
 }
 
+} // namespace dsp
+
+namespace dsp {
+
+// Low pass
+
 template <>
 std::unique_ptr<processor<float, float>>
 make_low_pass<float, 1>(double cutoffFrequencyNormalised)
 {
     return make_filter<Iir::Butterworth::LowPass<1>, float>(cutoffFrequencyNormalised);
+}
+
+template <>
+std::unique_ptr<processor<float, float>>
+make_low_pass<float, 2>(double cutoffFrequencyNormalised)
+{
+    return make_filter<Iir::Butterworth::LowPass<2>, float>(cutoffFrequencyNormalised);
 }
 
 template <>
@@ -212,9 +227,15 @@ make_low_pass<float, 3>(double cutoffFrequencyNormalised)
 
 template <>
 std::unique_ptr<processor<float, float>>
+make_low_pass<float, 4>(double cutoffFrequencyNormalised)
+{
+    return make_filter<Iir::Butterworth::LowPass<4>, float>(cutoffFrequencyNormalised);
+}
+
+template <>
+std::unique_ptr<processor<float, float>>
 make_low_pass<float, 5>(double cutoffFrequencyNormalised)
 {
     return make_filter<Iir::Butterworth::LowPass<5>, float>(cutoffFrequencyNormalised);
 }
-
 } // namespace dsp
