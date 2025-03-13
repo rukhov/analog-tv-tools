@@ -19,11 +19,8 @@
 
 namespace {
 constexpr double c_heterodine_frq = .25;
-// constexpr double c_db_deviation = 280000.; constexpr double c_dr_deviation = 280000.;
 constexpr double c_db_deviation = 230000.;
 constexpr double c_dr_deviation = 280000.;
-
-const std::array<const float, 3> chroma_deemphasis_taps = { 0.3002, -0.2997, -0.9994 };
 
 } // namespace
 
@@ -33,8 +30,7 @@ class secam_color_extractor : public color_extractor
 {
     std::unique_ptr<dsp::processor<float>> _color_band_pass;
     std::unique_ptr<dsp::processor<float>> _color_hilbert_transform;
-    std::unique_ptr<dsp::processor<float>> _color_demodulator;
-    std::unique_ptr<dsp::processor<float, std::complex<float>>> _quad_demodulator;
+    std::unique_ptr<dsp::processor<float, std::complex<float>>> _color_demodulator;
     const double _db_color_value_offset;
     const double _dr_color_value_offset;
     const double _db_color_value_scale;
@@ -69,10 +65,7 @@ public:
         : _color_band_pass(dsp::make_band_pass<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz) / samp_rate)),
-          _color_demodulator(dsp::make_fm_demodulator<float, float>()),
-          //_quad_demodulator(
-          // dsp::make_quadrature_demod<float>((calc_chroma_band_center()) / samp_rate)),
-          _quad_demodulator(dsp::make_quadrature_demod<float>(.25)),
+          _color_demodulator(dsp::make_quadrature_demod<float>(.25)),
           _db_color_value_offset(c_heterodine_frq +
                                  ((_standard.chroma_subcarrier1_hz) / samp_rate)),
           _dr_color_value_offset(c_heterodine_frq +
@@ -81,7 +74,6 @@ public:
           _dr_color_value_scale(samp_rate / c_dr_deviation),
           _chroma_de_emphasis(
               dsp::make_low_pass_inv_chebyshev<float, 1>(318000. / samp_rate, 8.)),
-          //_chroma_low_pass(dsp::make_direct<float>(chroma_deemphasis_taps)),
           _color_hilbert_transform(dsp::make_fir_hilbert_transform<float>(15)),
           _line_delay(dsp::usec2samples(samp_rate, _standard.H_us)),
           _u_comb_feedback(2),
@@ -106,24 +98,13 @@ private:
 
 
         auto u = _color_band_pass->process(chroma);
-        auto quad = _quad_demodulator->process(u);
-        // auto quad_filtered = _quad_high_pass->process(quad);
-        //  auto v = _color_hilbert_transform->process(u);
-
-        // u = _color_demodulator->process(u);
-        //     v = _v_demodulator->process(v);
-        //  u = _u_low_pass.process(u);
-        //     v = _v_low_pass.process(v);
-        //      u = _u_comb_feedback.process(u);
-        //      v = _v_comb_feedback.process(v);
+        auto quad = _color_demodulator->process(u);
 
         for (auto i = 0; i < chroma.size(); ++i) {
             _color_buffer[i] = (quad[i].real());
         }
 
         auto dbdr = _chroma_de_emphasis->process({ _color_buffer.data(), chroma.size() });
-        //  auto dbdr = std::span<float>{ _color_buffer.data(), chroma.size() };
-        // auto dbdr = _chroma_low_pass->process({ chroma.data(), chroma.size() });
 
         for (auto i = 0; i < chroma.size(); ++i) {
 
@@ -131,7 +112,6 @@ private:
             auto delayed = _line_delay.process(dbdr[i]);
 
             if ((tags[i] & cvbs_tag::hsync) == cvbs_tag::hsync) {
-                //_odd_line = !_odd_line;
                 _samples_from_hsync = 0;
             }
 
@@ -157,25 +137,13 @@ private:
                 dr = dbdr[i];
             }
 
-            if (_samples_from_hsync == _component_detect_lag_samples) {
-                //_odd_line = !_odd_line;
-
-                dr = 1;
-            }
-
             YDbDr ydbdr;
 
             ydbdr.y = luma[i];
-            // ydbdr.db = (dbdr[i] - _db_color_value_offset) * _db_color_value_scale;
-            // ydbdr.dr = (dbdr[i] - _dr_color_value_offset) * _dr_color_value_scale;
             ydbdr.db = (db - _db_color_value_offset) * _db_color_value_scale;
             ydbdr.dr = (dr - _dr_color_value_offset) * _dr_color_value_scale;
 
             out_buff[i] = YDbDr2Yuv(ydbdr);
-            // out_buff[i].v = v[i];
-            //  out_buff[i].u = -.5;
-            // out_buff[i].u = 0;
-            // out_buff[i].v = dbdr[i];
 
             ++_samples_from_hsync;
         }

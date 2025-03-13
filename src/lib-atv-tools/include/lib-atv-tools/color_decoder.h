@@ -79,8 +79,8 @@ public:
             out->y = _luma_delay.process(out->y);
             // out->y = *cvbs;
             // out->y = *luma;
-            // auto rgb = atv::Yuv2Rgb(*out);
-            //*out = Rgb2Yuv(rgb.fix());
+            auto rgb = atv::Yuv2Rgb(*out);
+            *out = Rgb2Yuv(rgb.fix());
         }
 
         return { _buffer.data(), inCVBS.size() };
