@@ -21,4 +21,10 @@ std::unique_ptr<processor<T, T>> make_high_pass(double cutoffFrequencyNormalised
 template <typename T, size_t order>
 std::unique_ptr<processor<T, T>> make_low_pass(double cutoffFrequencyNormalised);
 
+template <typename T, size_t order>
+std::unique_ptr<processor<T, T>>
+make_low_pass_inv_chebyshev(double cutoffFrequencyNormalised,
+                            double stopBandAttenuationDb);
+
+
 } // namespace dsp

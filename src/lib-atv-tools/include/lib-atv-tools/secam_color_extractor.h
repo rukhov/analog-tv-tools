@@ -12,6 +12,7 @@
 #include <lib-dsp/iir.h>
 #include <lib-dsp/iir_band_pass.h>
 #include <lib-dsp/iir_low_pass.h>
+#include <lib-dsp/integrator.h>
 #include <lib-dsp/low_pass_1st.h>
 #include <lib-dsp/quadrature_demod.h>
 #include <lib-dsp/utils.h>
@@ -41,10 +42,12 @@ class secam_color_extractor : public color_extractor
     dsp::comb_feedback _u_comb_feedback;
     dsp::comb_feedback _v_comb_feedback;
     std::vector<float> _color_buffer;
-    std::unique_ptr<dsp::processor<float>> _chroma_low_pass;
+    std::unique_ptr<dsp::processor<float>> _chroma_de_emphasis;
     std::unique_ptr<dsp::processor<float>> _luma_band_stop;
     dsp::delay<float> _line_delay;
-    bool _odd_line = false;
+    bool _odd_line = true;
+    uint64_t _component_detect_lag_samples;
+    uint64_t _samples_from_hsync;
 
     static const atv::standard _standard;
 
@@ -76,7 +79,8 @@ public:
                                  ((_standard.chroma_subcarrier2_hz) / samp_rate)),
           _db_color_value_scale(samp_rate / c_db_deviation),
           _dr_color_value_scale(samp_rate / c_dr_deviation),
-          _chroma_low_pass(dsp::make_low_pass<float, 1>(130000. / samp_rate)),
+          _chroma_de_emphasis(
+              dsp::make_low_pass_inv_chebyshev<float, 1>(318000. / samp_rate, 8.)),
           //_chroma_low_pass(dsp::make_direct<float>(chroma_deemphasis_taps)),
           _color_hilbert_transform(dsp::make_fir_hilbert_transform<float>(15)),
           _line_delay(dsp::usec2samples(samp_rate, _standard.H_us)),
@@ -84,7 +88,9 @@ public:
           _v_comb_feedback(2),
           _luma_band_stop(dsp::make_band_stop<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
-              (_standard.chroma_band_width_hz + 100000) / samp_rate))
+              (_standard.chroma_band_width_hz + 100000) / samp_rate)),
+          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 4.)),
+          _samples_from_hsync(0)
     {
     }
     // color_extractor
@@ -115,7 +121,7 @@ private:
             _color_buffer[i] = (quad[i].real());
         }
 
-        auto dbdr = _chroma_low_pass->process({ _color_buffer.data(), chroma.size() });
+        auto dbdr = _chroma_de_emphasis->process({ _color_buffer.data(), chroma.size() });
         //  auto dbdr = std::span<float>{ _color_buffer.data(), chroma.size() };
         // auto dbdr = _chroma_low_pass->process({ chroma.data(), chroma.size() });
 
@@ -125,7 +131,22 @@ private:
             auto delayed = _line_delay.process(dbdr[i]);
 
             if ((tags[i] & cvbs_tag::hsync) == cvbs_tag::hsync) {
-                _odd_line = !_odd_line;
+                //_odd_line = !_odd_line;
+                _samples_from_hsync = 0;
+            }
+
+            if (1) {
+                if (_samples_from_hsync == _component_detect_lag_samples) {
+
+                    if (dbdr[i] < _db_color_value_offset)
+                        _odd_line = true;
+                    else
+                        _odd_line = false;
+                }
+            } else {
+                if (_samples_from_hsync == _component_detect_lag_samples) {
+                    _odd_line = !_odd_line;
+                }
             }
 
             if (_odd_line) {
@@ -136,9 +157,17 @@ private:
                 dr = dbdr[i];
             }
 
+            if (_samples_from_hsync == _component_detect_lag_samples) {
+                //_odd_line = !_odd_line;
+
+                dr = 1;
+            }
+
             YDbDr ydbdr;
 
             ydbdr.y = luma[i];
+            // ydbdr.db = (dbdr[i] - _db_color_value_offset) * _db_color_value_scale;
+            // ydbdr.dr = (dbdr[i] - _dr_color_value_offset) * _dr_color_value_scale;
             ydbdr.db = (db - _db_color_value_offset) * _db_color_value_scale;
             ydbdr.dr = (dr - _dr_color_value_offset) * _dr_color_value_scale;
 
@@ -147,6 +176,8 @@ private:
             //  out_buff[i].u = -.5;
             // out_buff[i].u = 0;
             // out_buff[i].v = dbdr[i];
+
+            ++_samples_from_hsync;
         }
     }
 };

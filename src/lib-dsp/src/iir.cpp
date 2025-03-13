@@ -239,3 +239,17 @@ make_low_pass<float, 5>(double cutoffFrequencyNormalised)
     return make_filter<Iir::Butterworth::LowPass<5>, float>(cutoffFrequencyNormalised);
 }
 } // namespace dsp
+
+namespace dsp {
+
+// Low pass ChebyshevII
+
+template <>
+std::unique_ptr<processor<float, float>>
+make_low_pass_inv_chebyshev<float, 1>(double cutoffFrequencyNormalised,
+                                      double stopBandAttenuationDb)
+{
+    return make_filter<Iir::ChebyshevII::LowPass<1>, float>(cutoffFrequencyNormalised,
+                                                            stopBandAttenuationDb);
+}
+} // namespace dsp
