@@ -1,2 +1,3 @@
 def pytest_addoption(parser):
-    parser.addoption("--decoderPath", action="store", default="")
+    parser.addoption("--projectPath", action="store", default="")
+    parser.addoption("--assetsPath", action="store", default="")

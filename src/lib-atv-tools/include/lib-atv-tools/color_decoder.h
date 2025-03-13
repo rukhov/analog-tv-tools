@@ -58,29 +58,23 @@ public:
             _buffer.resize(inCVBS.size());
 
         // auto chroma_buff = _high_pass.process(inCVBS);
-        auto luma_filtered_buff = _luma_low_pass.process(inCVBS);
+        // auto luma_filtered_buff = _luma_low_pass.process(inCVBS);
 
-        if (_color_extractor)
-            _color_extractor->process(inCVBS, tags, { _buffer.data(), inCVBS.size() });
-        else {
-            for (size_t i = 0; i < luma_filtered_buff.size(); ++i) {
-                _buffer[i].y = luma_filtered_buff[i];
-            }
-        }
+        assert(_color_extractor);
 
+        _color_extractor->process(inCVBS, tags, { _buffer.data(), inCVBS.size() });
 
         auto cvbs = inCVBS.data();
         auto cvbs_end = cvbs + inCVBS.size();
         auto out = _buffer.data();
-        auto luma = luma_filtered_buff.data();
+        // auto luma = luma_filtered_buff.data();
 
-        for (; cvbs != cvbs_end; ++cvbs, ++out, ++luma) {
+        for (; cvbs != cvbs_end; ++cvbs, ++out) {
 
             out->y = _luma_delay.process(out->y);
-            // out->y = *cvbs;
-            // out->y = *luma;
-            auto rgb = atv::Yuv2Rgb(*out);
-            *out = Rgb2Yuv(rgb.fix());
+            // out->u = 0; out->v = 0;
+            //   out->y = *luma;
+            //   auto rgb = atv::Yuv2Rgb(*out); *out = Rgb2Yuv(rgb.fix());
         }
 
         return { _buffer.data(), inCVBS.size() };

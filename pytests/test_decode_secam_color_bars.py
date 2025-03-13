@@ -4,19 +4,25 @@ import zipfile
 import pytest
 
 @pytest.fixture(scope="session")
-def decoderPath(pytestconfig):
-    return pytestconfig.getoption("decoderPath")
+def assetsPath(pytestconfig):
+    return pytestconfig.getoption("assetsPath")
 
-def test_decode(decoderPath):
+@pytest.fixture(scope="session")
+def projectPath(pytestconfig):
+    return pytestconfig.getoption("projectPath")
+
+def test_decode(assetsPath, projectPath):
+
+    decoderPath = assetsPath + '/bin/analog-tv-tools-cli'
+
+    print("===========> PARAMS: projectPath: ", projectPath)
 
     try: 
 
         tmpFolder = Path('/tmp')
-        sourceDir = os.path.dirname(Path(__file__).resolve())
-        inputFile = Path( sourceDir + '/../test-data/cvbs-secam-color-bars.f32')
-        cvbsDataFile = inputFile
+        inputFile = Path( projectPath + '/test-data/cvbs-secam-color-bars.f32')
         aviOutputFile = tmpFolder.joinpath(inputFile.stem).with_suffix(".avi")
-        jpegOutputFileBase = tmpFolder.joinpath(inputFile.stem)
+        #jpegOutputFileBase = tmpFolder.joinpath(inputFile.stem)
 
         tmpFolder.mkdir(0o777, True, True)
 
@@ -25,19 +31,19 @@ def test_decode(decoderPath):
                 " --input-data-type cvbs"
                 " --output-type avi"
                 " --standard secam"
-                " --input-file " + str(cvbsDataFile) +
+                " --input-file " + str(inputFile) +
                 " --output-file " + str(aviOutputFile) +
-                " --sample-rate 16000000"
+                " --sample-rate 35468950"
                 " --dc-correction .0"
-                " --amplification 1.333"
-                " --max-frames 0"
+                " --amplification 1.33"
+                " --max-frames 2"
                 )
         
         out = child.read()
         
         print(out)
 
-        index = out.find("Total frame number:")
+        index = out.find("Total frame number: 2")
 
         assert index > 0
 
