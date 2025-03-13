@@ -1,6 +1,6 @@
 # Analog TV Tools project
 
-The tools for decoding the analogue TV signals. 
+The tools for decoding the analogue TV signals. <br>For the moment it is able to decode SECAM cvbs tv signal. NTSC and PAL is coming soon.
 
 ## Build
 
