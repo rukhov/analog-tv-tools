@@ -34,8 +34,10 @@ int main(int argc, char* argv[])
         std::unique_ptr<dsp::processor<float>> demodulator;
         std::unique_ptr<video_writer> writer;
 
-        if (opts.input_type == options::in_type::RAW) {
-            reader = make_raw_reader(opts.input_file);
+        if (opts.input_type == options::in_type::F32) {
+            reader = make_raw_reader(opts.input_file, DaraType::F32);
+        } else if (opts.input_type == options::in_type::I16) {
+            reader = make_raw_reader(opts.input_file, DaraType::I16);
         } else {
             reader = make_snd_reader(opts.input_file);
         }
@@ -136,7 +138,6 @@ int main(int argc, char* argv[])
                                 (decode_duration - video_encode_duration) / frameNum)
                                 .count())
                          : (0.));
-
     } catch (std::exception const& e) {
         std::cerr << std::format("Unhandled exception: {}\n", e.what());
     }

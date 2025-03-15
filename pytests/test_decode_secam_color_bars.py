@@ -20,22 +20,22 @@ def test_decode(assetsPath, projectPath):
     try: 
 
         tmpFolder = Path('/tmp')
-        inputFile = Path( projectPath + '/test-data/cvbs-secam-color-bars.f32')
+        inputFile = Path( projectPath + '/test-data/cvbs-secam-colorbars-36000000Hz.i16')
         aviOutputFile = tmpFolder.joinpath(inputFile.stem).with_suffix(".avi")
         #jpegOutputFileBase = tmpFolder.joinpath(inputFile.stem)
 
         tmpFolder.mkdir(0o777, True, True)
 
         child = os.popen(decoderPath + 
-                " --input-type raw"
+                " --input-type i16"
                 " --input-data-type cvbs"
                 " --output-type avi"
                 " --standard secam"
                 " --input-file " + str(inputFile) +
                 " --output-file " + str(aviOutputFile) +
-                " --sample-rate 35468950"
+                " --sample-rate 36000000"
                 " --dc-correction .0"
-                " --amplification 1.33"
+                " --amplification 1.333"
                 " --max-frames 2"
                 )
         

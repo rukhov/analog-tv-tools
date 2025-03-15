@@ -4,7 +4,7 @@
 
 struct options {
 
-    enum class in_type { AUTO, RAW };
+    enum class in_type { AUTO, F32, I16 };
     enum class out_type { AVI, RAW };
     enum class in_data_type { cvbs, fm, am };
 

@@ -63,7 +63,8 @@ public:
     quadrature_demod_impl(double carrierFrequency)
         : _carrierFrequency(carrierFrequency),
           _sine_table(getSineTable()),
-          _quad_high_pass(dsp::make_high_pass<std::complex<float>, 5>(carrierFrequency))
+          _quad_high_pass(
+              dsp::make_high_pass<std::complex<float>, 5>(carrierFrequency + .1))
     {
     }
 
@@ -89,6 +90,7 @@ private:
         // return { _buffer.data(), in.size() };
 
         auto filtered = _quad_high_pass->process({ _buffer.data(), in.size() });
+        // auto filtered = std::span<std::complex<float>>(_buffer.data(), in.size());
 
         // return filtered;
 

@@ -6,11 +6,24 @@ class raw_file_reader : public dsp::processor<float>
 {
     uint64_t _total_written = 0;
     std::ifstream _i;
-    std::vector<float> _buffer;
+    std::vector<uint8_t> _buffer;
+    std::vector<float> _out_buffer;
+    DaraType _type;
+
+    size_t itemSize() const
+    {
+        if (_type == DaraType::F32)
+            return sizeof(float);
+        else
+            return sizeof(int16_t);
+    }
+
+    size_t bufferLength() const { return _buffer.size() / itemSize(); }
+    void bufferResize(size_t length) { _buffer.resize(length * itemSize()); }
 
 public:
-    raw_file_reader(std::filesystem::path const& path)
-        : _i(path, std::ios::in | std::ios::binary)
+    raw_file_reader(std::filesystem::path const& path, DaraType type)
+        : _i(path, std::ios::in | std::ios::binary), _type(type)
     {
         std::clog << std::format("Opened file for read: {}", path.string());
     }
@@ -22,17 +35,38 @@ private:
     dsp::processor<float>::out_span_t
     process(dsp::processor<float>::in_span_t const& buff) override
     {
-        if (_buffer.size() < buff.size())
-            _buffer.resize(buff.size());
+        if (bufferLength() < buff.size())
+            bufferResize(buff.size());
 
-        _i.read(reinterpret_cast<char*>(_buffer.data()), buff.size() * sizeof(float));
+        if (_out_buffer.size() < buff.size())
+            _out_buffer.resize(buff.size());
 
-        return { _buffer.data(), _i.gcount() / sizeof(float) };
+        size_t itemsRead = 0;
+
+        _i.read(reinterpret_cast<char*>(_buffer.data()), buff.size() * itemSize());
+
+        itemsRead = _i.gcount() / itemSize();
+
+        if (_type == DaraType::F32) {
+            auto src = reinterpret_cast<float*>(_buffer.data());
+            for (size_t i = 0; i < itemsRead; ++i) {
+                _out_buffer[i] = src[i];
+            }
+        } else if (_type == DaraType::I16) {
+            auto src = reinterpret_cast<int16_t*>(_buffer.data());
+            for (size_t i = 0; i < itemsRead; ++i) {
+                _out_buffer[i] = src[i] / double(1 << 15);
+            }
+        } else
+            throw std::runtime_error("Unsipported data type");
+
+        return { _out_buffer.data(), itemsRead };
     }
 };
 } // namespace
 
-std::unique_ptr<dsp::processor<float>> make_raw_reader(std::filesystem::path const& path)
+std::unique_ptr<dsp::processor<float>> make_raw_reader(std::filesystem::path const& path,
+                                                       DaraType type)
 {
-    return std::make_unique<raw_file_reader>(path);
+    return std::make_unique<raw_file_reader>(path, type);
 }
