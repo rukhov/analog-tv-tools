@@ -2,6 +2,8 @@ import os
 from pathlib import Path, PosixPath
 import zipfile
 import pytest
+import sys
+import tempfile
 
 @pytest.fixture(scope="session")
 def assetsPath(pytestconfig):
@@ -11,15 +13,24 @@ def assetsPath(pytestconfig):
 def projectPath(pytestconfig):
     return pytestconfig.getoption("projectPath")
 
-def test_decode(assetsPath, projectPath):
+@pytest.fixture(scope="session")
+def executablesPath(pytestconfig):
+    return pytestconfig.getoption("executablesPath")
 
-    decoderPath = assetsPath + '/bin/analog-tv-tools-cli'
+def test_decode(assetsPath, projectPath, executablesPath):
 
-    print("===========> PARAMS: projectPath: ", projectPath)
+    if sys.platform == 'win32':
+        exe_suffix = '.exe'
+    else:
+        exe_suffix = ''
+
+    decoderPath = executablesPath + '/analog-tv-tools-cli' + exe_suffix
+
+    print("===========> decoderPath: ", decoderPath)
 
     try: 
 
-        tmpFolder = Path('/tmp')
+        tmpFolder = Path( tempfile.gettempdir() )
         inputFile = Path( projectPath + '/test-data/cvbs-secam-colorbars-36000000Hz.i16')
         aviOutputFile = tmpFolder.joinpath(inputFile.stem).with_suffix(".avi")
         #jpegOutputFileBase = tmpFolder.joinpath(inputFile.stem)
