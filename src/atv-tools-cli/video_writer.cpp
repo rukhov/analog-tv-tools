@@ -46,8 +46,8 @@ private:
 
             Vec3b retVal;
 
-            constexpr float mul = .9;
-            constexpr float add = .05;
+            constexpr float mul = .98;
+            constexpr float add = .01;
 
             rgb.r = rgb.r * mul + add;
             rgb.g = rgb.g * mul + add;
