@@ -58,10 +58,6 @@ jobs:
         run: |
           cmake --build ./build --config=RelWithDebInfo
 
-      - name: Run Tests
-        run: |
-          ctest --test-dir ./build -T test --output-on-failure -C RelWithDebInfo --verbose --output-log ./reports/tests.log
-
       - name: Make installation
         run: |
           cmake --install ./build --prefix=./install --config=RelWithDebInfo
@@ -73,3 +69,7 @@ jobs:
           include-hidden-files: true
           path: |
             install/
+
+      - name: Run Tests
+        run: |
+          ctest --test-dir ./build -T test --output-on-failure -C RelWithDebInfo --verbose --output-log ./reports/tests.log
