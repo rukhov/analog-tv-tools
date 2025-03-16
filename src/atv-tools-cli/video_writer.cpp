@@ -41,18 +41,33 @@ private:
         // if (width != _frame_size.width || height != _frame_size.height) throw
         // std::format("Frame size is not proper <{}, >", width, height);
 
+        auto RGB2Vec3d = [](const atv::RGB01& _rgb) -> Vec3b {
+            atv::RGB01 rgb = _rgb;
+
+            Vec3b retVal;
+
+            constexpr float mul = .98;
+            constexpr float add = .01;
+
+            rgb.r = rgb.r * mul + add;
+            rgb.g = rgb.g * mul + add;
+            rgb.b = rgb.b * mul + add;
+
+            rgb.fix();
+
+            retVal[0] = rgb.b * 255.;
+            retVal[1] = rgb.g * 255.;
+            retVal[2] = rgb.r * 255.;
+
+            return retVal;
+        };
+
         Mat frame(Size{ (int)rect_width, (int)rect_height }, CV_8UC3, Scalar(0, 0, 0));
 
         for (auto y = 0; y < rect_height; ++y) {
             for (auto x = 0; x < rect_width; ++x) {
-
                 auto yuv = src[x + y * total_width];
-                // std::swap(yuv.u, yuv.v);
-                auto rgb = atv::Yuv2Rgb(yuv);
-                // rgb.r = rgb.g = rgb.b = float(x) / width;
-
-                frame.at<Vec3b>({ x, y }) =
-                    Vec3b((rgb.b) * 255., (rgb.g) * 255., (rgb.r) * 255.);
+                frame.at<Vec3b>({ x, y }) = RGB2Vec3d(atv::Yuv2Rgb(yuv));
             }
         }
 

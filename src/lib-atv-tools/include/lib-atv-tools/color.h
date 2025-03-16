@@ -45,6 +45,24 @@ struct RGB01 {
         return *this;
     }
 
+    RGB01& check()
+    {
+        if (r < 0)
+            *this = RGB01(1, 1, 1);
+        if (r > 1)
+            *this = RGB01(1, 1, 1);
+        if (g < 0)
+            *this = RGB01(1, 1, 1);
+        if (g > 1)
+            *this = RGB01(1, 1, 1);
+        if (b < 0)
+            *this = RGB01(1, 1, 1);
+        if (b > 1)
+            *this = RGB01(1, 1, 1);
+
+        return *this;
+    }
+
     void verify() const
     {
         if (!(r >= 0 && r <= 1.) || !(g >= 0 && g <= 1.) || !(b >= 0 && b <= 1.)) {
@@ -83,15 +101,13 @@ inline YUV Rgb2Yuv(RGB01 const& rgb)
 inline RGB01 Yuv2Rgb(YUV const& yuv)
 {
     // Y = .299 R + .587 G + .114 B
-    // U = .492 (B - Y)
-    // V = .877 (R - Y)
+    // U = .492 (B - Y) -> U / .492 = B - Y -> (u / .492) + Y = B
+    // V = .877 (R - Y) -> V / .877 = R - Y -> (V / .877) + Y = R
     RGB01 rgb;
 
-    rgb.b = (.492f * yuv.y + yuv.u) / .492f;
-
-    rgb.r = (.877f * yuv.y + yuv.v) / .877f;
-
-    rgb.g = (yuv.y - .299f * rgb.r - .114f * rgb.b) / .587f;
+    rgb.b = yuv.u / .492f + yuv.y;
+    rgb.r = yuv.v / .877f + yuv.y;
+    rgb.g = (.299f * rgb.r + .114f * rgb.b - yuv.y) / -.587f;
 
     return rgb;
 };
@@ -149,6 +165,36 @@ inline YUV YDbDr2Yuv(YDbDr const& ydbdr)
     retVal.v = ydbdr.dr / -2.169;
 
     return retVal;
+};
+
+inline YDbDr RGB2YDbDr(const RGB01& rgb)
+{
+    // Dr = -1.9*(R-Y) -> R = Dr / -1.9 + Y
+    // Db = +1.5*(B-Y) -> B = Db / +1.5 + Y
+    // Y = 0.3*R + 0.59*G + 0.11*B -> G = -(0.3*R + 0.11*B - Y) / 0.59
+
+    YDbDr ydbdr;
+
+    ydbdr.y = 0.3 * rgb.r + 0.59 * rgb.g + 0.11 * rgb.b;
+    ydbdr.db = +1.5 * (rgb.b - ydbdr.y);
+    ydbdr.dr = -1.9 * (rgb.r - ydbdr.y);
+
+    return ydbdr;
+}
+
+inline RGB01 YDbDr2Rgb(YDbDr const& ydbdr)
+{
+    // Dr = -1.9*(R-Y) -> R = Dr / -1.9 + Y
+    // Db = +1.5*(B-Y) -> B = Db / +1.5 + Y
+    // Y = 0.3*R + 0.59*G + 0.11*B -> G = -(0.3*R + 0.11*B - Y) / 0.59
+
+    RGB01 rgb;
+
+    rgb.r = ydbdr.dr / -1.9 + ydbdr.y;
+    rgb.b = ydbdr.db / +1.5 + ydbdr.y;
+    rgb.g = -(0.3 * rgb.r + 0.11 * rgb.b - ydbdr.y) / 0.59;
+
+    return rgb;
 };
 
 } // namespace atv

@@ -21,7 +21,8 @@ int main(int argc, char* argv[])
     timer::clock_t::duration video_encode_duration = {};
 
     try {
-        std::cout << std::format("Analogue TV decoding tools.\n");
+        std::cout << std::format(
+            "Analogue TV decoding tools.\nCopyright (C) Roman Ukhov 2025.\n\n");
 
         options opts = read_options(argc, argv);
 
@@ -33,8 +34,10 @@ int main(int argc, char* argv[])
         std::unique_ptr<dsp::processor<float>> demodulator;
         std::unique_ptr<video_writer> writer;
 
-        if (opts.input_type == options::in_type::RAW) {
-            reader = make_raw_reader(opts.input_file);
+        if (opts.input_type == options::in_type::F32) {
+            reader = make_raw_reader(opts.input_file, DaraType::F32);
+        } else if (opts.input_type == options::in_type::I16) {
+            reader = make_raw_reader(opts.input_file, DaraType::I16);
         } else {
             reader = make_snd_reader(opts.input_file);
         }
@@ -54,12 +57,14 @@ int main(int argc, char* argv[])
 
         std::unique_ptr<dsp::resampler> resampler;
 
-        if (opts.processing_sample_rate_hz != opts.input_sample_rate_hz) {
+        if (0 && opts.processing_sample_rate_hz != opts.input_sample_rate_hz) {
             resampler = std::make_unique<dsp::resampler>(opts.input_sample_rate_hz,
                                                          opts.processing_sample_rate_hz);
 
             std::cout << std::format("Resampling to: {}\n",
                                      opts.processing_sample_rate_hz);
+        } else {
+            opts.processing_sample_rate_hz = opts.input_sample_rate_hz;
         }
 
         bool b_Stop = false;
@@ -84,7 +89,7 @@ int main(int argc, char* argv[])
                 b_Stop = true;
         };
 
-        std::vector<float> in_buffer(1024 * 16);
+        std::vector<float> in_buffer(1024 * 4);
         dsp::level_corrector<float> level_corrector(opts.dc_correction,
                                                     opts.amplification);
 
@@ -109,19 +114,17 @@ int main(int argc, char* argv[])
                 data = demodulator->process(data);
             }
 
+            level_corrector.process(data);
+
+            if (resampler)
+                data = resampler->process(data);
+
             if (raw_writer) {
                 raw_writer->process(data);
                 continue;
             }
 
-            level_corrector.process(data);
-
-            auto resampled = data;
-
-            if (resampler)
-                resampled = resampler->process(data);
-
-            decoder->process(resampled.size(), resampled.data());
+            decoder->process(data.size(), data.data());
 
             decode_duration += timer.duration();
         }
@@ -135,7 +138,6 @@ int main(int argc, char* argv[])
                                 (decode_duration - video_encode_duration) / frameNum)
                                 .count())
                          : (0.));
-
     } catch (std::exception const& e) {
         std::cerr << std::format("Unhandled exception: {}\n", e.what());
     }

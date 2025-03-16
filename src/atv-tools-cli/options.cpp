@@ -29,7 +29,8 @@ options read_options(int argc, char* argv[])
         ("help", "produce help message") //
         (INPUT_TYPE_OPTION,
          po::value<std::string>(),
-         "input file type (raw, auto), default auto. RAW means 32-bit float") //
+         "input file type (f32, i16, auto), default auto. f32 means 32-bit float, i16 "
+         "means int16") //
         (INPUT_DATA_TYPE_OPTION,
          po::value<std::string>(),
          "input data type (cvbs, fm, am), default cvbs.") //
@@ -64,8 +65,10 @@ options read_options(int argc, char* argv[])
 
     if (vm.count(INPUT_TYPE_OPTION)) {
         auto it = vm[INPUT_TYPE_OPTION].as<std::string>();
-        if (it == "raw")
-            opts.input_type = options::in_type::RAW;
+        if (it == "f32")
+            opts.input_type = options::in_type::F32;
+        else if (it == "i16")
+            opts.input_type = options::in_type::I16;
         else
             opts.input_type = options::in_type::AUTO;
         std::cout << std::format("input file type\t: '{}'\n", (int)opts.input_type);

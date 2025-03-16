@@ -65,6 +65,8 @@ public:
         : _color_band_pass(dsp::make_band_pass<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz) / samp_rate)),
+          //_color_demodulator(dsp::make_quadrature_demod<float>(calc_chroma_band_center()
+          /// samp_rate)),
           _color_demodulator(dsp::make_quadrature_demod<float>(.25)),
           _db_color_value_offset(c_heterodine_frq +
                                  ((_standard.chroma_subcarrier1_hz) / samp_rate)),
@@ -81,7 +83,7 @@ public:
           _luma_band_stop(dsp::make_band_stop<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz + 100000) / samp_rate)),
-          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 4.)),
+          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 5.9)),
           _samples_from_hsync(0)
     {
     }
@@ -143,7 +145,7 @@ private:
             ydbdr.db = (db - _db_color_value_offset) * _db_color_value_scale;
             ydbdr.dr = (dr - _dr_color_value_offset) * _dr_color_value_scale;
 
-            out_buff[i] = YDbDr2Yuv(ydbdr);
+            out_buff[i] = Rgb2Yuv(YDbDr2Rgb(ydbdr).fix());
 
             ++_samples_from_hsync;
         }

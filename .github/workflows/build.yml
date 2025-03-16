@@ -30,13 +30,13 @@ jobs:
           sudo apt-get update
           sudo apt-get --yes install autoconf automake pkg-config autoconf-archive
           sudo apt-get --yes install liburing-dev libx11-dev libxft-dev libtool bison gperf libgles2-mesa-dev libxext-dev libxrandr-dev libxi-dev 
-          sudo apt-get --yes install libxcursor-dev libxdamage-dev libxinerama-dev libltdl-dev libxtst-dev doxygen gnuradio gnuradio-dev
-          sudo pip3 install pytest
+          sudo apt-get --yes install libxcursor-dev libxdamage-dev libxinerama-dev libltdl-dev libxtst-dev doxygen gnuradio gnuradio-dev 
+          sudo apt-get --yes install python3-opencv python3-pytest
 
       - name: Install Windows Prerequisites
         if: ${{ matrix.platform == 'windows' }}
         run: |
-          pip3 install pytest
+          pip3 install opencv-python pytest
 
       - name: Checkout
         uses: actions/checkout@v4
@@ -52,15 +52,11 @@ jobs:
 
       - name: Configure project
         run: |
-          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} --preset=${{ matrix.platform }}-rel -S ./ -B ./build -DBUILD_GNURADIO_BLOCKS=OFF -DBUILD_PYTHON_TESTS=OFF
+          cmake ${{ steps.vcpkg.outputs.vcpkg-cmake-config }} --preset=${{ matrix.platform }}-rel -S ./ -B ./build -DBUILD_GNURADIO_BLOCKS=OFF -DBUILD_PYTHON_TESTS=ON
 
       - name: Build
         run: |
           cmake --build ./build --config=RelWithDebInfo
-
-      - name: Run Tests
-        run: |
-          ctest --test-dir ./build -T test --output-on-failure -C RelWithDebInfo --verbose --output-log ./reports/tests.log
 
       - name: Make installation
         run: |
@@ -73,3 +69,7 @@ jobs:
           include-hidden-files: true
           path: |
             install/
+
+      - name: Run Tests
+        run: |
+          ctest --test-dir ./build -T test --output-on-failure -C RelWithDebInfo --verbose --output-log ./reports/tests.log
