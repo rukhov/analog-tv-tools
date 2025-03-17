@@ -58,7 +58,7 @@ private:
                 _state.data(),
                 _coeffs.data(),
                 &_pFilterIndex,
-                _coeffs.size(),
+                _state.size(),
                 in.size());
 
         return { _buffer.data(), in.size() };
@@ -73,6 +73,19 @@ std::unique_ptr<processor<float, float>> make_fir_hilbert_transform<float>(size_
 {
     std::vector<float> coeffs(length);
     SIF_HilbertTransformerFirFilter(coeffs.data(), coeffs.size());
+
+    return std::make_unique<fir_impl<float>>(std::move(coeffs));
+}
+
+template <>
+std::unique_ptr<processor<float, float>>
+make_fir_low_pass<float>(size_t length, double cutOffFrequencyNormalised)
+{
+    std::vector<float> coeffs(length);
+    SIF_FirLowPassFilter(coeffs.data(),
+                         cutOffFrequencyNormalised,
+                         SLWindow_t::SIGLIB_HANNING_FILTER,
+                         coeffs.size());
 
     return std::make_unique<fir_impl<float>>(std::move(coeffs));
 }

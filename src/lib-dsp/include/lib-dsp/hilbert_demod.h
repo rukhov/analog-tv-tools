@@ -23,11 +23,7 @@
 
 namespace dsp {
 
-template <typename T>
-std::unique_ptr<processor<T, T>> make_fir_hilbert_transform(size_t length);
-
-template <typename T>
-std::unique_ptr<processor<T, T>> make_fir_low_pass(size_t length,
-                                                   double cutOffFrequencyNormalised);
+template <typename T, typename Tout = std::complex<T>>
+std::unique_ptr<processor<T, Tout>> make_hilbert_demod(size_t hilbertFirLength);
 
 } // namespace dsp
