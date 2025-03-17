@@ -38,19 +38,19 @@ def test_decode(projectPath, decoderPath):
 
     tolerance = 20  # Tolerance value for color comparison
 
-    assert vc.CheckAt( (210, 350) , (230, 230, 230) , tolerance) == True
+    assert vc.CheckAt( (210, 350) , (220, 220, 220) , tolerance) == True
 
-    assert vc.CheckAt( (360, 350) , (230, 230, 10 ) , tolerance) == True
+    assert vc.CheckAt( (360, 350) , (220, 220, 10 ) , tolerance) == True
 
-    assert vc.CheckAt( (500, 350) , (10,  230, 230) , tolerance) == True
+    assert vc.CheckAt( (500, 350) , (10,  220, 220) , tolerance) == True
     
-    assert vc.CheckAt( (650, 350) , (10,  240, 10 ) , tolerance) == True
+    assert vc.CheckAt( (650, 350) , (10,  230, 10 ) , tolerance) == True
 
-    assert vc.CheckAt( (800, 350) , (240, 10,  240) , tolerance) == True
+    assert vc.CheckAt( (800, 350) , (230, 10,  230) , tolerance) == True
 
-    assert vc.CheckAt( (960, 350) , (240, 10,  10 ) , tolerance) == True
+    assert vc.CheckAt( (960, 350) , (230, 10,  10 ) , tolerance) == True
 
-    assert vc.CheckAt( (1100,350) , (10,  10,  240) , tolerance) == True
+    assert vc.CheckAt( (1100,350) , (10,  10,  230) , tolerance) == True
 
 
 
@@ -58,6 +58,6 @@ def test_decode(projectPath, decoderPath):
 
     assert vc.CheckAt( (600, 850) , (40,  10,  80 ) , tolerance) == True
 
-    assert vc.CheckAt( (400, 850) , (230, 230, 230) , tolerance) == True
+    assert vc.CheckAt( (400, 850) , (220, 220, 220) , tolerance) == True
 
     assert vc.CheckAt( (220, 850) , (10,   30,  60) , tolerance) == True

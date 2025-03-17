@@ -112,10 +112,9 @@ public:
           _luma_band_stop(dsp::make_band_stop<float, 5>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz + 100000) / samp_rate)),
-          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 5.9)),
+          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 6.9)),
           _samples_from_hsync(0),
           _luma_delay(_chroma_lag_length)
-    //_luma_delay(1)
     {
     }
     // color_extractor
@@ -142,9 +141,10 @@ private:
         }
 
         auto dbdr = _chroma_de_emphasis->process({ _color_buffer.data(), chroma.size() });
-        // auto dbdr = std::span<float>({ _color_buffer.data(), chroma.size() });
 
-        for (auto i = 0; i < chroma.size(); ++i) {
+        for (auto i = 0; i < chroma.size(); ++i, ++_samples_from_hsync) {
+
+            const auto s = dbdr[i];
 
             float db, dr;
             auto delayed = _line_delay.process(dbdr[i]);
@@ -156,10 +156,12 @@ private:
             if (1) {
                 if (_samples_from_hsync == _component_detect_lag_samples) {
 
-                    if (dbdr[i] < _db_color_value_offset)
+                    if (std::abs(s - _db_color_value_offset) <
+                        std::abs(s - _dr_color_value_offset)) {
                         _odd_line = true;
-                    else
+                    } else {
                         _odd_line = false;
+                    }
                 }
             } else {
                 if (_samples_from_hsync == _component_detect_lag_samples) {
@@ -168,38 +170,20 @@ private:
             }
 
             if (_odd_line) {
-                db = dbdr[i];
+                db = s;
                 dr = delayed;
             } else {
                 db = delayed;
-                dr = dbdr[i];
+                dr = s;
             }
 
             YDbDr ydbdr;
 
-            ydbdr.y = _luma_delay.process(luma[i]);
+            ydbdr.y = _luma_delay.process(luma[i]) * .95;
             ydbdr.db = (db - _db_color_value_offset) * _db_color_value_scale;
             ydbdr.dr = (dr - _dr_color_value_offset) * _dr_color_value_scale;
-            // ydbdr.db = 0;
-            // ydbdr.dr = 0;
 
-            out_buff[i] = Rgb2Yuv(YDbDr2Rgb(ydbdr));
-
-            // out_buff[i].y = chroma[i];
-
-            ++_samples_from_hsync;
-
-            continue;
-
-            static double phase = 0;
-            phase += 0.4 * dsp::DSP_2PI;
-            phase = std::fmod(phase, dsp::DSP_2PI);
-
-            // out_buff[i].u = std::cos(phase);
-            // out_buff[i].v = std::sin(phase);
-
-            out_buff[i].u = quad[i].real();
-            out_buff[i].v = quad[i].imag();
+            out_buff[i] = Rgb2Yuv(YDbDr2Rgb(ydbdr).fix());
         }
     }
 };

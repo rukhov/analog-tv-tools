@@ -26,7 +26,7 @@ constexpr double DSP_2PI = 2 * DSP_PI;
 
 inline double usec2samples(double samp_rate, double us)
 {
-    return us * samp_rate / 1000000;
+    return us * samp_rate / 1000000.;
 }
 
 // Seconds to SecondSamples
