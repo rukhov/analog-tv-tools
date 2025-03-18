@@ -107,6 +107,8 @@ std::unique_ptr<iir_impl<FilterType, DataType>> make_filter(Args&&... args)
 
 namespace dsp {
 
+// Butterworth
+
 template <>
 std::unique_ptr<processor<float, float>>
 make_band_pass<float, 1>(double centerFrequencyNormalised, double bandWidthNormalised)
@@ -145,6 +147,50 @@ make_band_pass<float, 5>(double centerFrequencyNormalised, double bandWidthNorma
 {
     return make_filter<Iir::Butterworth::BandPass<5>, float>(centerFrequencyNormalised,
                                                              bandWidthNormalised);
+}
+
+} // namespace dsp
+
+namespace dsp {
+
+// ChebyshevII
+
+template <>
+std::unique_ptr<processor<float, float>> make_band_pass_inv_chebyshev<float, 3>(
+    double centerFrequencyNormalised, double bandWidthNormalised, double stopBandAtten)
+{
+    return make_filter<Iir::ChebyshevII::BandPass<3>, float>(
+        centerFrequencyNormalised, bandWidthNormalised, stopBandAtten);
+}
+
+template <>
+std::unique_ptr<processor<float, float>> make_band_pass_inv_chebyshev<float, 5>(
+    double centerFrequencyNormalised, double bandWidthNormalised, double stopBandAtten)
+{
+    return make_filter<Iir::ChebyshevII::BandPass<5>, float>(
+        centerFrequencyNormalised, bandWidthNormalised, stopBandAtten);
+}
+
+} // namespace dsp
+
+namespace dsp {
+
+// Chebyshev
+
+template <>
+std::unique_ptr<processor<float, float>> make_band_pass_chebyshev<float, 3>(
+    double centerFrequencyNormalised, double bandWidthNormalised, double passBandRippe)
+{
+    return make_filter<Iir::ChebyshevI::BandPass<3>, float>(
+        centerFrequencyNormalised, bandWidthNormalised, passBandRippe);
+}
+
+template <>
+std::unique_ptr<processor<float, float>> make_band_pass_chebyshev<float, 5>(
+    double centerFrequencyNormalised, double bandWidthNormalised, double passBandRippe)
+{
+    return make_filter<Iir::ChebyshevI::BandPass<5>, float>(
+        centerFrequencyNormalised, bandWidthNormalised, passBandRippe);
 }
 
 } // namespace dsp
@@ -289,6 +335,24 @@ make_low_pass_inv_chebyshev<float, 1>(double cutoffFrequencyNormalised,
                                       double stopBandAttenuationDb)
 {
     return make_filter<Iir::ChebyshevII::LowPass<1>, float>(cutoffFrequencyNormalised,
+                                                            stopBandAttenuationDb);
+}
+
+template <>
+std::unique_ptr<processor<float, float>>
+make_low_pass_inv_chebyshev<float, 3>(double cutoffFrequencyNormalised,
+                                      double stopBandAttenuationDb)
+{
+    return make_filter<Iir::ChebyshevII::LowPass<3>, float>(cutoffFrequencyNormalised,
+                                                            stopBandAttenuationDb);
+}
+
+template <>
+std::unique_ptr<processor<float, float>>
+make_low_pass_inv_chebyshev<float, 5>(double cutoffFrequencyNormalised,
+                                      double stopBandAttenuationDb)
+{
+    return make_filter<Iir::ChebyshevII::LowPass<5>, float>(cutoffFrequencyNormalised,
                                                             stopBandAttenuationDb);
 }
 } // namespace dsp

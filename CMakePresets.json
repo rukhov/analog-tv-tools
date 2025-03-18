@@ -7,7 +7,8 @@
       "binaryDir": "${sourceDir}/../build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "BUILD_PYTHON_TESTS": "ON"
+        "BUILD_PYTHON_TESTS": "ON",
+        "CMAKE_BUILD_TYPE": "Debug"
       }
     },
     {
@@ -16,7 +17,8 @@
       "binaryDir": "${sourceDir}/../build",
       "cacheVariables": {
         "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake",
-        "BUILD_PYTHON_TESTS": "ON"
+        "BUILD_PYTHON_TESTS": "ON",
+        "CMAKE_BUILD_TYPE": "Release"
       }
     },
     {

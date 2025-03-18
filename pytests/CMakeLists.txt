@@ -3,7 +3,12 @@ find_program(PYTEST "pytest")
 #message("=================== atv-tools-cli dir: " ${CMAKE_BINARY_DIR})
 
 set(ASSETS_DIR \ ${CMAKE_BINARY_DIR} )
-set(EXECUTABLES_DIR \ ${CMAKE_BINARY_DIR}/bin/$<CONFIG> )
+if(UNIX)
+  set(EXECUTABLES_DIR \ ${CMAKE_BINARY_DIR}/bin )
+elseif(WIN32)
+  set(EXECUTABLES_DIR \ ${CMAKE_BINARY_DIR}/bin/$<CONFIG> )
+endif()
+
 set(PROJECTS_DIR \ ${CMAKE_SOURCE_DIR} )
 
 add_test (NAME Python_Tests

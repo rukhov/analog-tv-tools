@@ -31,6 +31,14 @@ std::unique_ptr<processor<T, T>> make_band_pass(double centerFrequencyNormalised
                                                 double bandWidthNormalised);
 
 template <typename T, size_t order>
+std::unique_ptr<processor<T, T>> make_band_pass_inv_chebyshev(
+    double centerFrequencyNormalised, double bandWidthNormalised, double stopBandAtten);
+
+template <typename T, size_t order>
+std::unique_ptr<processor<T, T>> make_band_pass_chebyshev(
+    double centerFrequencyNormalised, double bandWidthNormalised, double passBandRippe);
+
+template <typename T, size_t order>
 std::unique_ptr<processor<T, T>> make_band_stop(double centerFrequencyNormalised,
                                                 double bandWidthNormalised);
 

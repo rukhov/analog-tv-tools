@@ -15,7 +15,7 @@
         "cwd": "/home/rukhov/projects/analog-tv-tools/tests",
         "environment": 
             [
-                {"name": "LD_LIBRARY_PATH", "value": "/home/rukhov/projects/analog-tv-tools/build/src/gr-AnalogTV/lib"}, 
+                {"name": "LD_LIBRARY_PATH", "value": "/home/rukhov/projects/analog-tv-tools/build/bin"}, 
                 {"name": "GRC_BLOCKS_PATH", "value": "/home/rukhov/projects/analog-tv-tools/analog-tv-tools/src/gr-AnalogTV/grc"},
                 {"name": "PYTHONPATH", "value": "/home/rukhov/projects/analog-tv-tools/install/lib/python3.12/dist-packages"}
             ],
@@ -39,16 +39,16 @@
             "--input-data-type", "cvbs",
             "--out-cvbs-raw-file", "/tmp/cvbs-secam-color-bars.f32",
             "--standard", "secam",
-            "--input-file", "${workspaceFolder}/test-data/cartoon-test-video-4-36000000Hz.i16",
-            "--output-file", "/tmp/cartoon-test-video-4-36000000Hz.i16.avi",
+            "--input-file", "${workspaceFolder}/test-data/cvbs-secam-colorbars-36000000Hz.i16",
+            "--output-file", "/tmp/test.avi",
             "--sample-rate", "36000000",
             "--dc-correction", "0",
             "--amplification", "1.333",
-            "--max-frames", "0",
+            "--max-frames", "4",
         ],
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}/../build/bin",
-        "externalConsole": true,
+        "externalConsole": false,
         "avoidWindowsConsoleRedirection": true,
         "setupCommands": [
             {
