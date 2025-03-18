@@ -35,11 +35,11 @@
 
 namespace atv {
 
-std::unique_ptr<color_extractor> make_color_extractor(standard const& standard,
-                                                      uint64_t samp_rate)
+std::unique_ptr<color_extractor>
+make_color_extractor(standard const& standard, uint64_t samp_rate, bool balck_and_white)
 {
     if (standard.standard == standard_e::SECAM) {
-        return std::make_unique<secam_color_extractor>(samp_rate);
+        return std::make_unique<secam_color_extractor>(samp_rate, balck_and_white);
     }
 
     return {};
@@ -49,16 +49,14 @@ class color_decoder
 {
     const double _burst_shift;
     std::unique_ptr<color_extractor> _color_extractor;
-    dsp::delay<float> _luma_delay;
     bool _sync = false;
     std::vector<YUV> _buffer;
 
 public:
-    color_decoder(standard const& standard, uint64_t samp_rate)
+    color_decoder(standard const& standard, uint64_t samp_rate, bool balck_and_white)
         : _burst_shift(standard.standard == standard_e::NTSC ? -(123. / 360.)
                                                              : 135. / 360.),
-          _luma_delay(dsp::usec2samples(samp_rate, .7)),
-          _color_extractor(make_color_extractor(standard, samp_rate))
+          _color_extractor(make_color_extractor(standard, samp_rate, balck_and_white))
     {
     }
 
@@ -70,25 +68,14 @@ public:
         if (_buffer.size() < inCVBS.size())
             _buffer.resize(inCVBS.size());
 
-        // auto chroma_buff = _high_pass.process(inCVBS);
-        // auto luma_filtered_buff = _luma_low_pass.process(inCVBS);
+        if (_color_extractor) {
+            _color_extractor->process(inCVBS, tags, { _buffer.data(), inCVBS.size() });
+        } else {
 
-        assert(_color_extractor);
-
-        _color_extractor->process(inCVBS, tags, { _buffer.data(), inCVBS.size() });
-
-        auto cvbs = inCVBS.data();
-        auto cvbs_end = cvbs + inCVBS.size();
-        auto out = _buffer.data();
-        // auto luma = luma_filtered_buff.data();
-
-        for (; cvbs != cvbs_end; ++cvbs, ++out) {
-
-            out->y = _luma_delay.process(out->y);
-            // out->u = 0; out->v = 0;
-            //   out->y = *luma;
+            for (size_t i = 0; i < inCVBS.size(); ++i) {
+                _buffer[i] = YUV{ inCVBS[i], 0, 0 };
+            }
         }
-
         return { _buffer.data(), inCVBS.size() };
     }
 };
