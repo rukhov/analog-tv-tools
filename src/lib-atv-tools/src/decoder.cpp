@@ -39,9 +39,10 @@ class decoder_impl : public decoder
 public:
     decoder_impl(standard const& params,
                  uint64_t samp_rate,
+                 bool black_and_white,
                  video_buffer::frame_cb& frame_cb)
         : _pulse_detector(params, samp_rate),
-          _color_decoder(params, samp_rate),
+          _color_decoder(params, samp_rate, black_and_white),
           _video_buffer(params, samp_rate, frame_cb)
     {
     }
@@ -147,9 +148,11 @@ private:
 
 namespace atv {
 
-std::unique_ptr<decoder>
-decoder::make(standard const& params, uint64_t samp_rate, video_buffer::frame_cb frame_cb)
+std::unique_ptr<decoder> decoder::make(standard const& params,
+                                       uint64_t samp_rate,
+                                       bool black_and_white,
+                                       video_buffer::frame_cb frame_cb)
 {
-    return std::make_unique<decoder_impl>(params, samp_rate, frame_cb);
+    return std::make_unique<decoder_impl>(params, samp_rate, black_and_white, frame_cb);
 }
 } // namespace atv

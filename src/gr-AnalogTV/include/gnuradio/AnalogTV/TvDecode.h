@@ -32,7 +32,7 @@ public:
      * class. AnalogTV::TvDecode::make is the public interface for
      * creating new instances.
      */
-    static sptr make(double samp_rate);
+    static sptr make(double samp_rate, bool bw);
 };
 
 } // namespace AnalogTV

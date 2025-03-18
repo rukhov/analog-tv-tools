@@ -40,6 +40,7 @@ namespace {
 constexpr double c_heterodine_frq = .25;
 constexpr double c_db_deviation = 230000.;
 constexpr double c_dr_deviation = 280000.;
+constexpr double c_max_deviation = 350000.;
 constexpr size_t c_hilbertFirLength = 127;
 
 } // namespace
@@ -67,6 +68,7 @@ class secam_color_extractor : public color_extractor
     bool _odd_line = true;
     uint64_t _component_detect_lag_samples;
     uint64_t _samples_from_hsync;
+    bool _black_and_white;
 
     static const atv::standard _standard;
 
@@ -84,10 +86,10 @@ class secam_color_extractor : public color_extractor
     }
 
 public:
-    secam_color_extractor(double samp_rate)
-        : _chroma_lag_length(c_hilbertFirLength / 2 - dsp::usec2samples(samp_rate, .3)),
-          _demod_min((_standard.chroma_subcarrier1_hz - 350000.) / samp_rate),
-          _demod_max((_standard.chroma_subcarrier2_hz + 350000.) / samp_rate),
+    secam_color_extractor(double samp_rate, bool black_and_white)
+        : _chroma_lag_length(c_hilbertFirLength / 2 + dsp::usec2samples(samp_rate, .4)),
+          _demod_min((_standard.chroma_subcarrier1_hz - c_max_deviation) / samp_rate),
+          _demod_max((_standard.chroma_subcarrier2_hz + c_max_deviation) / samp_rate),
           _color_demodulator(dsp::make_hilbert_demod<float>(c_hilbertFirLength)),
           //_chroma_band_pass(dsp::make_band_pass_chebyshev<float, 5>(
           // calc_chroma_band_center() / samp_rate, _standard.chroma_band_width_hz /
@@ -109,12 +111,13 @@ public:
           _line_delay(dsp::usec2samples(samp_rate, _standard.H_us)),
           _u_comb_feedback(2),
           _v_comb_feedback(2),
-          _luma_band_stop(dsp::make_band_stop<float, 5>(
+          _luma_band_stop(dsp::make_band_stop<float, 2>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz + 100000) / samp_rate)),
           _component_detect_lag_samples(dsp::usec2samples(samp_rate, 6.9)),
           _samples_from_hsync(0),
-          _luma_delay(_chroma_lag_length)
+          _luma_delay(_chroma_lag_length),
+          _black_and_white(black_and_white)
     {
     }
     // color_extractor
@@ -127,7 +130,17 @@ private:
             _color_buffer.resize(chroma.size());
 
         auto luma = _luma_band_stop->process(chroma);
+        // auto luma = chroma;
 
+        if (_black_and_white) {
+
+            for (auto i = 0; i < luma.size(); ++i) {
+
+                out_buff[i] = YUV{ _luma_delay.process(luma[i]) * .95f, 0, 0 };
+            }
+
+            return;
+        }
 
         auto quad = _color_demodulator->process(_chroma_band_pass->process(chroma));
 

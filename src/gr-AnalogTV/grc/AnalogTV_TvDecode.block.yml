@@ -4,7 +4,7 @@ category: '[AnalogTV]'
 
 templates:
   imports: from gnuradio import AnalogTV
-  make: AnalogTV.TvDecode(${samp_rate})
+  make: AnalogTV.TvDecode(${samp_rate}, ${black_and_white})
 
 #  Make one 'parameters' list entry for every parameter you want settable from the GUI.
 #     Keys include:
@@ -23,6 +23,12 @@ parameters:
   options: [0]
   option_labels: ["SECAM"]
   default: 0
+- id: black_and_white
+  label: B&W
+  dtype: bool
+  options: [True, False]
+  option_labels: ["True", "False"]
+  default: False
 #- id: ...
 #  label: ...
 #  dtype: ...

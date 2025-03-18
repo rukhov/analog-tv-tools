@@ -112,8 +112,8 @@ int main(int argc, char* argv[])
         dsp::level_corrector<float> level_corrector(opts.dc_correction,
                                                     opts.amplification);
 
-        auto decoder =
-            atv::decoder::make(decoder_opts, opts.processing_sample_rate_hz, frame_cb);
+        auto decoder = atv::decoder::make(
+            decoder_opts, opts.processing_sample_rate_hz, false, frame_cb);
 
         std::cout << std::format("Start processing.\n");
 

@@ -34,7 +34,7 @@ class TvDecode_impl : public TvDecode
     std::unique_ptr<decoder> _decoder;
 
 public:
-    TvDecode_impl(double samp_rate)
+    TvDecode_impl(double samp_rate, bool bw)
         : gr::block("TvDecode",
                     gr::io_signature::make(
                         1 /* min inputs */, 1 /* max inputs */, sizeof(float)),
@@ -47,7 +47,7 @@ public:
                                                                sizeof(float),
                                                                sizeof(float),
                                                                sizeof(float) }))),
-          _decoder(decoder::make(standard::make(standard_e::SECAM), samp_rate, {}))
+          _decoder(decoder::make(standard::make(standard_e::SECAM), samp_rate, bw, {}))
     {
     }
 
@@ -117,9 +117,9 @@ public:
 
 namespace gr {
 namespace AnalogTV {
-TvDecode::sptr TvDecode::make(double samp_rate)
+TvDecode::sptr TvDecode::make(double samp_rate, bool bw)
 {
-    return gnuradio::make_block_sptr<TvDecode_impl>(samp_rate);
+    return gnuradio::make_block_sptr<TvDecode_impl>(samp_rate, bw);
 }
 } // namespace AnalogTV
 } // namespace gr
