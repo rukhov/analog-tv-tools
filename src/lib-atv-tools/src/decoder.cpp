@@ -21,6 +21,7 @@
 #include "../include/lib-atv-tools/color_decoder.h"
 #include "../include/lib-atv-tools/decoder.h"
 #include "../include/lib-atv-tools/pulse_detector.h"
+#include "../include/lib-atv-tools/pulse_detector2.h"
 
 #include <lib-dsp/iir_low_pass.h>
 #include <lib-dsp/limiter.h>
@@ -33,7 +34,7 @@ using namespace atv;
 class decoder_impl : public decoder
 {
     color_decoder _color_decoder;
-    pulse_detector _pulse_detector;
+    pulse_detector2 _pulse_detector;
     video_buffer _video_buffer;
 
 public:
