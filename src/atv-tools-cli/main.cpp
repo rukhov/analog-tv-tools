@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
                                                     opts.amplification);
 
         auto decoder = atv::decoder::make(
-            decoder_opts, opts.processing_sample_rate_hz, false, frame_cb);
+            decoder_opts, opts.processing_sample_rate_hz, opts.balck_and_white, frame_cb);
 
         std::cout << std::format("Start processing.\n");
 
