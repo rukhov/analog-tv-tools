@@ -19,47 +19,39 @@
 
 #pragma once
 
+#include "processor.h"
+#include <boost/circular_buffer.hpp>
+
 namespace dsp {
 
 template <typename T>
-class trigger : public processor<T>
+class cross_correlation : public processor<T>
 {
-    T _on_level;
-    const bool _positive = true;
-    T _prev_sample = 0;
-    T _state = 0;
     std::vector<T> _buffer;
-
-    T _process(T s)
-    {
-        if (_positive) {
-            if (s >= _on_level && _prev_sample < _on_level) {
-                _state = 1;
-            } else {
-                _state = -1;
-            }
-        } else {
-            if (s <= _on_level && _prev_sample > _on_level) {
-                _state = 1;
-            } else {
-                _state = -1;
-            }
-        }
-        _prev_sample = s;
-        return _state;
-    }
+    boost::circular_buffer<T> _state;
+    T _sum = 0;
+    const size_t _pulse_length;
 
 public:
     using in_span_t = processor<T>::in_span_t;
     using out_span_t = processor<T>::out_span_t;
 
-    trigger(T level, bool positive = true) : _on_level(level), _positive(positive) {}
+    cross_correlation(size_t pulse_length) : _pulse_length(pulse_length)
+    {
+        _state.resize(pulse_length, 0);
+    }
 
-    T state() const { return _state; }
+    size_t get_pulse_length() const { return _pulse_length; }
 
-    void reset(T s) { _state = s; }
+    T _process(T s)
+    {
+        _state.push_back(s);
 
-    T process(T s) override { return _process(s); }
+        _sum += _state.back();
+        _sum -= _state.front();
+
+        return _sum;
+    }
 
     out_span_t process(in_span_t const& in) override
     {

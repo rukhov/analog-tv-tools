@@ -23,8 +23,11 @@
 #include "../include/lib-atv-tools/pulse_detector.h"
 #include "../include/lib-atv-tools/pulse_detector2.h"
 
+#include <lib-dsp/cross_correlation.h>
 #include <lib-dsp/iir_low_pass.h>
 #include <lib-dsp/limiter.h>
+#include <lib-dsp/trigger.h>
+#include <lib-dsp/type_convertor.h>
 #include <lib-dsp/utils.h>
 
 namespace {
@@ -37,6 +40,10 @@ class decoder_impl : public decoder
     pulse_detector2 _pulse_detector;
     video_buffer _video_buffer;
 
+    dsp::type_convertor<float, int64_t, 1000.f> _integer_cvbs;
+    dsp::cross_correlation<float> _pulse_correlation;
+    dsp::trigger<float> _vsync_trigger;
+
 public:
     decoder_impl(standard const& params,
                  uint64_t samp_rate,
@@ -44,27 +51,16 @@ public:
                  video_buffer::frame_cb& frame_cb)
         : _pulse_detector(params, samp_rate),
           _color_decoder(params, samp_rate, black_and_white),
-          _video_buffer(params, samp_rate, frame_cb)
+          _video_buffer(params, samp_rate, frame_cb),
+          _pulse_correlation(
+              dsp::usec2samples(samp_rate, params.vertical_serration_pulse_length_us)),
+          _vsync_trigger(-.25 * dsp::usec2samples(
+                                    samp_rate, params.vertical_serration_pulse_length_us),
+                         false)
     {
     }
 
 private:
-    uint32_t make_tag(auto vsync, auto hsync)
-    {
-        uint32_t tag = 0;
-
-        if (vsync > 0) {
-
-            tag |= _pulse_detector.event_frame() ? cvbs_tag::vsync_even
-                                                 : cvbs_tag::vsync_odd;
-        }
-
-        if (hsync > 0)
-            tag |= cvbs_tag::hsync;
-
-        return tag;
-    }
-
     // decoder
     void process(uint64_t length,
                  float const* binput,
@@ -80,6 +76,8 @@ private:
         if (!length)
             return;
 
+        // auto int_cvbs = _integer_cvbs.process({ binput, length });
+
         auto in = binput;
         auto yout = video_yout;
         auto uout = video_uout;
@@ -90,6 +88,9 @@ private:
         auto d3out = dbg3;
 
         auto tags = _pulse_detector.process({ binput, length });
+        auto pulses =
+            _vsync_trigger.process(_pulse_correlation.process({ binput, length }));
+        // auto pulses = std::span<int>(int_cvbs);
 
         auto yuv_buff =
             _color_decoder.process(std::span<float const>(binput, length), tags);
@@ -139,7 +140,9 @@ private:
             }
 
             if (dbg3) {
-                //*d3out = pd_debug2;
+                //*d3out = *tag;
+                *d3out = pulses[i];
+                //*d3out = int_cvbs[i];
             }
         }
     }

@@ -20,13 +20,18 @@
 #pragma once
 
 #include <lib-dsp/contraphase_detector.h>
+#include <lib-dsp/cross_correlation.h>
 #include <lib-dsp/differentiator.h>
 #include <lib-dsp/integrator.h>
 #include <lib-dsp/pll.h>
 #include <lib-dsp/pulse_detector.h>
+#include <lib-dsp/pulse_generator.h>
+#include <lib-dsp/threshold.h>
 #include <lib-dsp/trigger.h>
 #include <lib-dsp/unovibrator.h>
 #include <lib-dsp/utils.h>
+
+#include <boost/circular_buffer.hpp>
 
 #include "cvbs.h"
 #include "standard.h"
@@ -36,9 +41,8 @@ class pulse_detector2
 {
 public:
     pulse_detector2(standard const& standard, double samp_rate)
-        : _H_length(dsp::usec2samples(samp_rate, standard.H_us)),
-          _H_div_2_length(_H_length / 2),
-          _lines_per_frame(standard.total_line_count / 2 - 1),
+        : _hline_length(dsp::usec2samples(samp_rate, standard.H_us)),
+          _H_div_2_length(_hline_length / 2),
           _vsync_trigger(.25, true),
           _hsync_pll(dsp::pll::make_regular(
               dsp::hz2rel_frq(samp_rate, standard.hsync_pulse_frequency_hz),
@@ -52,40 +56,32 @@ public:
           _vsync_integrator(dsp::relTimeSec(samp_rate, .0001)),
           _vsync_dc_eliminator(
               dsp::sec2samples(samp_rate, 1 / standard.vsync_pulse_frequency_hz)),
-          _hsync_pulse_min_length(dsp::usec2samples(
-              samp_rate, standard.hsync_pulse_length_us - standard.timing_tolerance_us)),
-          _pre_equalisation_pulse_min_length(dsp::usec2samples(
-              samp_rate,
-              standard.pre_equalisation_pulse_length_us - standard.timing_tolerance_us)),
-          _vertical_serration_pulse_min_length(
-              dsp::usec2samples(samp_rate,
-                                standard.vertical_serration_pulse_length_us -
-                                    standard.timing_tolerance_us)),
-          _vertical_serration_pulse_max_length(
-              dsp::usec2samples(samp_rate,
-                                standard.vertical_serration_pulse_length_us +
-                                    standard.timing_tolerance_us)),
-          _hline_min_length(dsp::usec2samples(samp_rate,
-                                              standard.H_us -
-                                                  standard.hsync_pulse_length_us -
-                                                  standard.timing_tolerance_us)),
-          _hline_max_length(
-              dsp::usec2samples(samp_rate,
-                                1000000 / standard.hsync_pulse_frequency_hz -
-                                    standard.hsync_pulse_length_us +
-                                    standard.pre_equalisation_pulse_length_us)),
           _color_burst_sync(
               dsp::usec2samples(samp_rate,
                                 standard.h_ref_point_to_burst_styart_us -
                                     standard.hsync_pulse_length_us),
               dsp::usec2samples(samp_rate, standard.chroma_burst_duration_us)),
-          _hsync(dsp::usec2samples(samp_rate, 1.35), 1)
+
+
+          _hsync(dsp::usec2samples(samp_rate, 1.35), 1),
+          _hpulse_correlator(
+              dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us)),
+          _hpulse_trigger(
+              -.2 * dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us), false),
+          _hsync_pulse_generator(standard.hsync_pulse_frequency_hz / samp_rate),
+
+          _vpulse_correlator(
+              dsp::usec2samples(samp_rate, standard.vertical_serration_pulse_length_us)),
+          _vpulse_trigger(
+              -.2 * dsp::usec2samples(samp_rate,
+                                      standard.vertical_serration_pulse_length_us),
+              false)
     {
     }
 
     void reset_pulses()
     {
-        _even_frame = _cycles_since_hline % _H_length < _H_div_2_length;
+        _even_frame = _cycles_since_hline_start % _hline_length < _H_div_2_length;
         // std::cout << _hsync_line_counter << ".";
         _hsync_line_counter = 0;
     }
@@ -97,119 +93,55 @@ public:
         if (_tags_buff.size() < in_cvbs.size())
             _tags_buff.resize(in_cvbs.size());
 
-        auto const* cvbs = in_cvbs.data();
-        auto* tag = _tags_buff.data();
-        auto const* cvbs_end = cvbs + in_cvbs.size();
+        auto vsync = _vpulse_trigger.process(_vpulse_correlator.process(in_cvbs));
+        auto hsync = _hpulse_trigger.process(_hpulse_correlator.process(in_cvbs));
+        hsync = _hsync_pulse_generator.process(hsync);
 
-        for (; cvbs != cvbs_end; ++cvbs, ++tag) {
+        for (size_t i = 0; i < in_cvbs.size(); ++i, ++_cycles_since_hpulse) {
 
-            _sync_pulse_detector.process(-(*cvbs));
-            count_pulses();
+            _tags_buff[i] = 0;
 
-            if (_hsync_line_counter > 7 && _hsync_line_counter < _lines_per_frame - 22) {
-                _hsync_pll->process(_sync_pulse_detector.state());
-            } else {
-                _hsync_pll->process(0);
+            if (vsync[i] > 0) {
+
+                _even_frame = _cycles_since_hpulse > _prev_cycles_since_hpulse;
+
+                if (_even_frame)
+                    _tags_buff[i] |= cvbs_tag::vsync_even;
+                else
+                    _tags_buff[i] |= cvbs_tag::vsync_odd;
+
+                _hsync_line_counter = 0;
+
+                _prev_cycles_since_hpulse = _cycles_since_hpulse;
             }
 
-            _hsync_trigger.process(_hsync_pll->phase());
-
-            _vsync_integrator.process(_sync_pulse_detector.state());
-            _vsync_dc_eliminator.process(_vsync_integrator.state());
-            _vsync_trigger.process(_vsync_dc_eliminator.state());
-
-            if (_vsync_trigger.state() > 0 && _hsync_line_counter == 0)
-                _vsync_trigger.reset(-1);
-
-            if (_vsync_trigger.state() > 0) {
-                reset_pulses();
+            if (hsync[i] > 0) {
+                _tags_buff[i] |= cvbs_tag::hsync;
+                ++_hsync_line_counter;
+                _cycles_since_hpulse = 0;
             }
-
-            _hsync.process(_hsync_trigger.state() > 0 ? 1 : -1);
-            _color_burst_sync.process(_hsync.state());
-
-            *tag = 0;
-
-            if (_vsync_trigger.state() > 0)
-                *tag |= _even_frame ? cvbs_tag::vsync_even : cvbs_tag::vsync_odd;
-
-            if (_hsync.state() > 0)
-                *tag |= cvbs_tag::hsync;
-
-            if (_color_burst_sync.state() > 0)
-                *tag |= cvbs_tag::color_burst;
         }
 
         return { _tags_buff.data(), in_cvbs.size() };
     }
 
 private:
-    void count_pulses()
-    {
-        bool s = _sync_pulse_detector.state() > 0;
-
-        if (s) {
-
-            // pulse raise
-            if (!_cycles_since_pulse_raise) {
-
-                // regular line
-                if (_cycles_since_pulse_fall > _hline_min_length &&
-                    _cycles_since_pulse_fall <= _hline_max_length) {
-
-                    ++_hsync_line_counter;
-                    _cycles_since_hline = 0;
-                    _hline = false;
-                }
-
-                _cycles_since_pulse_fall = 0;
-            }
-
-            ++_cycles_since_pulse_raise;
-        }
-
-        if (!s) {
-
-            _hline = true;
-            ++_cycles_since_hline;
-
-            // pulse fall
-            if (!_cycles_since_pulse_fall) {
-
-                // ?
-                if (_cycles_since_pulse_raise >= _vertical_serration_pulse_max_length) {
-                } else if (_cycles_since_pulse_raise >=
-                           _vertical_serration_pulse_min_length) {
-                    // vertical serratioin pulse
-
-                } else if (_cycles_since_pulse_raise >= _hsync_pulse_min_length) {
-                    // hsync pulse
-
-                } else if (_cycles_since_pulse_raise >=
-                           _pre_equalisation_pulse_min_length) {
-                    // pre-equalisation pulse
-
-                } else {
-                    // unknown pulse
-                }
-                _cycles_since_pulse_raise = 0;
-            }
-
-            ++_cycles_since_pulse_fall;
-        }
-    }
-
-private:
-    const uint64_t _H_length;
+    const uint64_t _hline_length;
     const uint64_t _H_div_2_length;
 
-    const uint64_t _hsync_pulse_min_length;
-    const uint64_t _pre_equalisation_pulse_min_length;
-    const uint64_t _vertical_serration_pulse_min_length;
-    const uint64_t _vertical_serration_pulse_max_length;
-    const uint64_t _hline_min_length;
-    const uint64_t _hline_max_length;
-    const uint64_t _lines_per_frame;
+    // hsync
+    dsp::cross_correlation<float> _hpulse_correlator;
+    dsp::trigger<float> _hpulse_trigger;
+    float _hpulse_correlator_min_state = 0;
+    bool _hpulse_in_pulse_state = false;
+    dsp::pulse_generator<float> _hsync_pulse_generator;
+
+    // VSync
+    dsp::cross_correlation<float> _vpulse_correlator;
+    dsp::trigger<float> _vpulse_trigger;
+
+    uint64_t _cycles_since_hpulse = 0;
+    uint64_t _prev_cycles_since_hpulse = 0;
 
     dsp::pulse_detector<float> _sync_pulse_detector;
     std::unique_ptr<dsp::pll> _hsync_pll;
@@ -224,7 +156,7 @@ private:
 
     uint64_t _cycles_since_pulse_raise = 0;
     uint64_t _cycles_since_pulse_fall = 0;
-    uint64_t _cycles_since_hline = 0;
+    uint64_t _cycles_since_hline_start = 0;
     bool _hline = false;
 
     uint64_t _hsync_line_counter = 0;

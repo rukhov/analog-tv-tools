@@ -19,47 +19,29 @@
 
 #pragma once
 
+#include "processor.h"
+
 namespace dsp {
 
 template <typename T>
-class trigger : public processor<T>
+class pulse_generator : public dsp::processor<T>
 {
-    T _on_level;
-    const bool _positive = true;
-    T _prev_sample = 0;
-    T _state = 0;
     std::vector<T> _buffer;
-
-    T _process(T s)
-    {
-        if (_positive) {
-            if (s >= _on_level && _prev_sample < _on_level) {
-                _state = 1;
-            } else {
-                _state = -1;
-            }
-        } else {
-            if (s <= _on_level && _prev_sample > _on_level) {
-                _state = 1;
-            } else {
-                _state = -1;
-            }
-        }
-        _prev_sample = s;
-        return _state;
-    }
+    const double _frequency;
+    const double _corrector;
+    const double _soft_corrector;
+    double _phase = 0.3f;
 
 public:
-    using in_span_t = processor<T>::in_span_t;
-    using out_span_t = processor<T>::out_span_t;
+    using in_span_t = processor<float>::in_span_t;
+    using out_span_t = processor<float>::out_span_t;
 
-    trigger(T level, bool positive = true) : _on_level(level), _positive(positive) {}
-
-    T state() const { return _state; }
-
-    void reset(T s) { _state = s; }
-
-    T process(T s) override { return _process(s); }
+    pulse_generator(double frequency)
+        : _frequency(frequency),
+          _corrector(frequency / 8.),
+          _soft_corrector(frequency / 64.)
+    {
+    }
 
     out_span_t process(in_span_t const& in) override
     {
@@ -73,6 +55,37 @@ public:
         }
 
         return out;
+    }
+
+    T _process(T s)
+    {
+        if (s > 0) {
+            /*
+                if (_phase < 0.2)
+                    _phase -= _soft_corrector;
+                else if (_phase < 0.5)
+                    _phase -= _corrector;
+                else if (_phase > 0.8)
+                    _phase += _soft_corrector;
+                else
+                    _phase += _corrector;
+                    */
+            if (_phase < 0.5)
+                _phase -= _corrector;
+            else
+                _phase += _corrector;
+        }
+
+        _phase += _frequency;
+
+        if (_phase > 1) {
+            _phase -= 1;
+            s = 1;
+        } else {
+            s = 0;
+        }
+
+        return s;
     }
 };
 } // namespace dsp
