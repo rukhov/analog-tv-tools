@@ -20,6 +20,7 @@
 #pragma once
 
 #include "processor.h"
+#include "utils.h"
 
 namespace dsp {
 
@@ -30,16 +31,31 @@ class pulse_generator : public dsp::processor<T>
     const double _frequency;
     const double _corrector;
     const double _soft_corrector;
-    double _phase = 0.3f;
+    const double _start_phase;
+    double _phase = 0.3;
+    double _prev_phase = 0.;
+    const int _pulse_delay;
+    int _samples_to_dalay = 0;
+
+    inline static int calc_delay(double samp_rate, double frequency, double phase_shift)
+    {
+        auto delay = phase_shift / frequency;
+        while (delay < 0.) {
+            delay += 1. / frequency;
+        }
+        return int(delay);
+    }
 
 public:
     using in_span_t = processor<float>::in_span_t;
     using out_span_t = processor<float>::out_span_t;
 
-    pulse_generator(double frequency)
+    pulse_generator(double samp_rate, double frequency, int delay)
         : _frequency(frequency),
           _corrector(frequency / 8.),
-          _soft_corrector(frequency / 64.)
+          _soft_corrector(frequency / 64.),
+          _start_phase(0.),
+          _pulse_delay(delay)
     {
     }
 
@@ -70,20 +86,29 @@ public:
                 else
                     _phase += _corrector;
                     */
-            if (_phase < 0.5)
-                _phase -= _corrector;
-            else
+            if (_phase > .5)
                 _phase += _corrector;
+            else
+                _phase -= _corrector;
         }
 
         _phase += _frequency;
 
-        if (_phase > 1) {
+        s = 0;
+
+        while (_phase > 1) {
             _phase -= 1;
-            s = 1;
-        } else {
-            s = 0;
+            _samples_to_dalay = _pulse_delay;
+            // s = 1;
         }
+
+        if (!_samples_to_dalay) {
+            s = 1;
+        }
+
+        --_samples_to_dalay;
+
+        _prev_phase = _phase;
 
         return s;
     }

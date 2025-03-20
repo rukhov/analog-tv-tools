@@ -23,6 +23,7 @@
 #include <lib-dsp/cross_correlation.h>
 #include <lib-dsp/differentiator.h>
 #include <lib-dsp/integrator.h>
+#include <lib-dsp/peack_detector.h>
 #include <lib-dsp/pll.h>
 #include <lib-dsp/pulse_detector.h>
 #include <lib-dsp/pulse_generator.h>
@@ -67,8 +68,11 @@ public:
           _hpulse_correlator(
               dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us)),
           _hpulse_trigger(
-              -.2 * dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us), false),
-          _hsync_pulse_generator(standard.hsync_pulse_frequency_hz / samp_rate),
+              -.3 * dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us), false),
+          _hsync_pulse_generator(
+              samp_rate,
+              dsp::hz2rel_frq(samp_rate, standard.hsync_pulse_frequency_hz),
+              65. + 75. * samp_rate / 48000000.),
 
           _vpulse_correlator(
               dsp::usec2samples(samp_rate, standard.vertical_serration_pulse_length_us)),
@@ -105,6 +109,9 @@ public:
 
                 _even_frame = _cycles_since_hpulse > _prev_cycles_since_hpulse;
 
+                // std::cout << _cycles_since_hpulse << "-" << _prev_cycles_since_hpulse
+                // << "==";
+
                 if (_even_frame)
                     _tags_buff[i] |= cvbs_tag::vsync_even;
                 else
@@ -132,6 +139,7 @@ private:
     // hsync
     dsp::cross_correlation<float> _hpulse_correlator;
     dsp::trigger<float> _hpulse_trigger;
+    // dsp::peack_detector<float> _hpulse_trigger;
     float _hpulse_correlator_min_state = 0;
     bool _hpulse_in_pulse_state = false;
     dsp::pulse_generator<float> _hsync_pulse_generator;

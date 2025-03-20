@@ -32,6 +32,7 @@ public:
     virtual ~processor() = default;
     virtual out_span_t process(in_span_t const&) = 0;
     virtual OutT process(InT s) { return 0; };
+    virtual double get_delay_us() const { return 0.; };
 };
 
 } // namespace dsp

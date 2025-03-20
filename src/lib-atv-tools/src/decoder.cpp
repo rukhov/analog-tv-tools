@@ -42,7 +42,7 @@ class decoder_impl : public decoder
 
     dsp::type_convertor<float, int64_t, 1000.f> _integer_cvbs;
     dsp::cross_correlation<float> _pulse_correlation;
-    dsp::trigger<float> _vsync_trigger;
+    dsp::trigger<float> _hsync_trigger;
 
 public:
     decoder_impl(standard const& params,
@@ -52,10 +52,8 @@ public:
         : _pulse_detector(params, samp_rate),
           _color_decoder(params, samp_rate, black_and_white),
           _video_buffer(params, samp_rate, frame_cb),
-          _pulse_correlation(
-              dsp::usec2samples(samp_rate, params.vertical_serration_pulse_length_us)),
-          _vsync_trigger(-.25 * dsp::usec2samples(
-                                    samp_rate, params.vertical_serration_pulse_length_us),
+          _pulse_correlation(dsp::usec2samples(samp_rate, params.hsync_pulse_length_us)),
+          _hsync_trigger(-.3 * dsp::usec2samples(samp_rate, params.hsync_pulse_length_us),
                          false)
     {
     }
@@ -88,9 +86,9 @@ private:
         auto d3out = dbg3;
 
         auto tags = _pulse_detector.process({ binput, length });
-        auto pulses =
-            _vsync_trigger.process(_pulse_correlation.process({ binput, length }));
-        // auto pulses = std::span<int>(int_cvbs);
+        // auto correlator = _pulse_correlation.process({ binput, length });
+        // auto pulses = _hsync_trigger.process(correlator);
+        //   auto pulses = std::span<int>(int_cvbs);
 
         auto yuv_buff =
             _color_decoder.process(std::span<float const>(binput, length), tags);
@@ -124,7 +122,7 @@ private:
             }
 
             if (dbg1) {
-                *d1out = yuv->u;
+                //*d1out = in[i];
                 //*bout2 = 0;
                 //*d1out = (*tag) & (cvbs_tag::vsync_odd | cvbs_tag::vsync_even);
                 //*d1out = pd_debug1;
@@ -135,13 +133,13 @@ private:
             }
 
             if (dbg2) {
-                *d2out = yuv->v;
+                //*d2out = correlator[i];
                 //*d2out = (*tag) & cvbs_tag::color_burst;
             }
 
             if (dbg3) {
                 //*d3out = *tag;
-                *d3out = pulses[i];
+                //*d3out = pulses[i];
                 //*d3out = int_cvbs[i];
             }
         }
