@@ -114,7 +114,7 @@ public:
           _luma_band_stop(dsp::make_band_stop<float, 2>(
               (calc_chroma_band_center()) / samp_rate,
               (_standard.chroma_band_width_hz + 100000) / samp_rate)),
-          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 6.9)),
+          _component_detect_lag_samples(dsp::usec2samples(samp_rate, 4.)),
           _samples_from_hsync(0),
           _luma_delay(_chroma_lag_length),
           _black_and_white(black_and_white)

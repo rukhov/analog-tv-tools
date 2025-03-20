@@ -32,7 +32,7 @@ class pulse_generator : public dsp::processor<T>
     const double _corrector;
     const double _soft_corrector;
     const double _start_phase;
-    double _phase = 0.3;
+    double _phase = 1.;
     double _prev_phase = 0.;
     const int _pulse_delay;
     int _samples_to_dalay = 0;
@@ -52,8 +52,8 @@ public:
 
     pulse_generator(double samp_rate, double frequency, int delay)
         : _frequency(frequency),
-          _corrector(frequency / 8.),
-          _soft_corrector(frequency / 64.),
+          _corrector(frequency * 4.),
+          _soft_corrector(frequency * 1.),
           _start_phase(0.),
           _pulse_delay(delay)
     {
@@ -76,20 +76,15 @@ public:
     T _process(T s)
     {
         if (s > 0) {
-            /*
-                if (_phase < 0.2)
-                    _phase -= _soft_corrector;
-                else if (_phase < 0.5)
-                    _phase -= _corrector;
-                else if (_phase > 0.8)
-                    _phase += _soft_corrector;
-                else
-                    _phase += _corrector;
-                    */
-            if (_phase > .5)
-                _phase += _corrector;
-            else
-                _phase -= _corrector;
+            if (_phase > .99) {
+                _phase += (1 - _phase) * _soft_corrector;
+            } else if (_phase < .01) {
+                _phase -= _phase * _soft_corrector;
+            } else if (_phase > .5) {
+                _phase += (1 - _phase) * _corrector;
+            } else {
+                _phase -= _phase * _corrector;
+            }
         }
 
         _phase += _frequency;
