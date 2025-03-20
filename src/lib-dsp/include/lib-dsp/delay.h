@@ -21,14 +21,26 @@
 
 #include <boost/circular_buffer.hpp>
 
+#include "processor.h"
+
 namespace dsp {
 
 template <typename T>
-class delay
+class delay : public processor<T>
 {
     boost::circular_buffer<T> _buffer;
+    std::vector<T> _out_buffer;
+
+    T _process(T s)
+    {
+        _buffer.push_back(s);
+        return state();
+    }
 
 public:
+    using in_span_t = processor<T>::in_span_t;
+    using out_span_t = processor<T>::out_span_t;
+
     delay(size_t len) : _buffer(len, len, T{}) {}
 
     size_t capacity() const { return _buffer.capacity(); }
@@ -36,10 +48,20 @@ public:
 
     T state() const { return _buffer.front(); }
 
-    T process(T s)
+    T process(T s) override { return _process(s); }
+
+    out_span_t process(in_span_t const& in) override
     {
-        _buffer.push_back(s);
-        return state();
+        if (_out_buffer.size() < in.size())
+            _out_buffer.resize(in.size());
+
+        auto out = std::span<T>(_out_buffer.data(), in.size());
+
+        for (uint32_t i = 0; i < in.size(); ++i) {
+            out[i] = _process(in[i]);
+        }
+
+        return out;
     }
 };
 } // namespace dsp

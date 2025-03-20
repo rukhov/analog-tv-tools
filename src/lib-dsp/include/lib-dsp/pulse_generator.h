@@ -28,11 +28,12 @@ template <typename T>
 class pulse_generator : public dsp::processor<T>
 {
     std::vector<T> _buffer;
-    const double _frequency;
+    double _frequency;
+    double _frequency_step;
     const double _corrector;
     const double _soft_corrector;
     const double _start_phase;
-    double _phase = 1.;
+    double _phase = .5;
     double _prev_phase = 0.;
     const int _pulse_delay;
     int _samples_to_dalay = 0;
@@ -46,44 +47,25 @@ class pulse_generator : public dsp::processor<T>
         return int(delay);
     }
 
-public:
-    using in_span_t = processor<float>::in_span_t;
-    using out_span_t = processor<float>::out_span_t;
-
-    pulse_generator(double samp_rate, double frequency, int delay)
-        : _frequency(frequency),
-          _corrector(frequency * 4.),
-          _soft_corrector(frequency * 1.),
-          _start_phase(0.),
-          _pulse_delay(delay)
-    {
-    }
-
-    out_span_t process(in_span_t const& in) override
-    {
-        if (_buffer.size() < in.size())
-            _buffer.resize(in.size());
-
-        auto out = std::span<T>(_buffer.data(), in.size());
-
-        for (uint32_t i = 0; i < in.size(); ++i) {
-            out[i] = _process(in[i]);
-        }
-
-        return out;
-    }
-
     T _process(T s)
     {
         if (s > 0) {
-            if (_phase > .99) {
-                _phase += (1 - _phase) * _soft_corrector;
-            } else if (_phase < .01) {
-                _phase -= _phase * _soft_corrector;
+            if (_phase > .999) {
+                //_phase += (1 - _phase) * _soft_corrector;
+            } else if (_phase < .001) {
+                //_phase -= _phase * _soft_corrector;
+            } else if (_phase > .95) {
+                _phase += _soft_corrector;
+            } else if (_phase < .05) {
+                _phase -= _soft_corrector;
+            } else if (_phase > .70) {
+                _phase += _corrector;
+            } else if (_phase < .30) {
+                _phase -= _corrector;
             } else if (_phase > .5) {
-                _phase += (1 - _phase) * _corrector;
+                _phase += _corrector * 4;
             } else {
-                _phase -= _phase * _corrector;
+                _phase -= _corrector * 4;
             }
         }
 
@@ -107,5 +89,35 @@ public:
 
         return s;
     }
+
+public:
+    using in_span_t = processor<float>::in_span_t;
+    using out_span_t = processor<float>::out_span_t;
+
+    pulse_generator(double samp_rate, double frequency, int delay)
+        : _frequency(frequency),
+          _frequency_step(frequency * .000000001),
+          _corrector(frequency / 2.),
+          _soft_corrector(frequency / 8.),
+          _start_phase(0.),
+          _pulse_delay(delay)
+    {
+    }
+
+    out_span_t process(in_span_t const& in) override
+    {
+        if (_buffer.size() < in.size())
+            _buffer.resize(in.size());
+
+        auto out = std::span<T>(_buffer.data(), in.size());
+
+        for (uint32_t i = 0; i < in.size(); ++i) {
+            out[i] = _process(in[i]);
+        }
+
+        return out;
+    }
+
+    T process(T s) override { return _process(s); }
 };
 } // namespace dsp

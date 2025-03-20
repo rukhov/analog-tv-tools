@@ -21,11 +21,11 @@ def test_decode(projectPath, decoderPath):
             " --sample-rate 36000000"
             " --dc-correction .0"
             " --amplification 1.333"
-            " --max-frames 3"
+            " --max-frames 0"
             )
     
     out = child.read()
     
     m = re.search(r'Total frame number: (\d+)', out)
 
-    assert int(m[1]) == 3
+    assert int(m[1]) == 33
