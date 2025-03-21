@@ -71,7 +71,11 @@ int main(int argc, char* argv[])
         if (opts.output_type == options::out_type::RAW) {
             raw_writer = make_raw_writer(opts.out_cvbs_raw_file);
         } else {
-            writer = video_writer::make(opts.output_file, decoder_opts);
+            try {
+                writer = video_writer::make(opts.output_file, decoder_opts);
+            } catch (std::exception const& e) {
+                std::cerr << std::format("Failed to create video writer: {}\n", e.what());
+            }
         }
 
         std::unique_ptr<dsp::resampler> resampler;
@@ -95,10 +99,12 @@ int main(int argc, char* argv[])
                             size_t total_height) {
             std::cout << std::format("Frame: {}\r", frameNum) << std::flush;
 
-            if (writer) {
+            {
                 timer timer;
-                writer->process_frame(
-                    frame, rect_width, rect_height, total_width, total_height);
+                if (writer) {
+                    writer->process_frame(
+                        frame, rect_width, rect_height, total_width, total_height);
+                }
                 video_encode_duration += timer.duration();
             }
 
@@ -112,8 +118,8 @@ int main(int argc, char* argv[])
         dsp::level_corrector<float> level_corrector(opts.dc_correction,
                                                     opts.amplification);
 
-        auto decoder =
-            atv::decoder::make(decoder_opts, opts.processing_sample_rate_hz, frame_cb);
+        auto decoder = atv::decoder::make(
+            decoder_opts, opts.processing_sample_rate_hz, opts.balck_and_white, frame_cb);
 
         std::cout << std::format("Start processing.\n");
 

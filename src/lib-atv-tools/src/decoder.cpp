@@ -21,9 +21,12 @@
 #include "../include/lib-atv-tools/color_decoder.h"
 #include "../include/lib-atv-tools/decoder.h"
 #include "../include/lib-atv-tools/pulse_detector.h"
+#include "../include/lib-atv-tools/pulse_detector2.h"
 
 #include <lib-dsp/iir_low_pass.h>
 #include <lib-dsp/limiter.h>
+#include <lib-dsp/trigger.h>
+#include <lib-dsp/type_convertor.h>
 #include <lib-dsp/utils.h>
 
 namespace {
@@ -33,36 +36,23 @@ using namespace atv;
 class decoder_impl : public decoder
 {
     color_decoder _color_decoder;
-    pulse_detector _pulse_detector;
+    pulse_detector2 _pulse_detector;
     video_buffer _video_buffer;
+
+    dsp::type_convertor<float, int64_t, 1000.f> _integer_cvbs;
 
 public:
     decoder_impl(standard const& params,
                  uint64_t samp_rate,
+                 bool black_and_white,
                  video_buffer::frame_cb& frame_cb)
         : _pulse_detector(params, samp_rate),
-          _color_decoder(params, samp_rate),
+          _color_decoder(params, samp_rate, black_and_white),
           _video_buffer(params, samp_rate, frame_cb)
     {
     }
 
 private:
-    uint32_t make_tag(auto vsync, auto hsync)
-    {
-        uint32_t tag = 0;
-
-        if (vsync > 0) {
-
-            tag |= _pulse_detector.event_frame() ? cvbs_tag::vsync_even
-                                                 : cvbs_tag::vsync_odd;
-        }
-
-        if (hsync > 0)
-            tag |= cvbs_tag::hsync;
-
-        return tag;
-    }
-
     // decoder
     void process(uint64_t length,
                  float const* binput,
@@ -109,19 +99,25 @@ private:
 
             auto pixel = _video_buffer.process(*yuv, *tag);
 
-            if (video_yout && video_uout && video_vout) {
+            if (video_yout) {
                 *yout = pixel.Y;
+            }
+
+            if (video_uout) {
                 *uout = pixel.Cb;
+            }
+
+            if (video_vout) {
                 *vout = pixel.Cr;
             }
 
             if (luma_out) {
-                *lout = yuv->y;
-                //*lout = *in;
+                //*lout = yuv->y;
+                *lout = *in;
             }
 
             if (dbg1) {
-                *d1out = yuv->u;
+                *d1out = *tag;
                 //*bout2 = 0;
                 //*d1out = (*tag) & (cvbs_tag::vsync_odd | cvbs_tag::vsync_even);
                 //*d1out = pd_debug1;
@@ -132,12 +128,14 @@ private:
             }
 
             if (dbg2) {
-                *d2out = yuv->v;
+                //*d2out = correlator[i];
                 //*d2out = (*tag) & cvbs_tag::color_burst;
             }
 
             if (dbg3) {
-                //*d3out = pd_debug2;
+                //*d3out = *tag;
+                //*d3out = pulses[i];
+                //*d3out = int_cvbs[i];
             }
         }
     }
@@ -147,9 +145,11 @@ private:
 
 namespace atv {
 
-std::unique_ptr<decoder>
-decoder::make(standard const& params, uint64_t samp_rate, video_buffer::frame_cb frame_cb)
+std::unique_ptr<decoder> decoder::make(standard const& params,
+                                       uint64_t samp_rate,
+                                       bool black_and_white,
+                                       video_buffer::frame_cb frame_cb)
 {
-    return std::make_unique<decoder_impl>(params, samp_rate, frame_cb);
+    return std::make_unique<decoder_impl>(params, samp_rate, black_and_white, frame_cb);
 }
 } // namespace atv

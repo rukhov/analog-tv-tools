@@ -40,8 +40,10 @@ public:
                          float* dbg2 = nullptr,
                          float* dbg3 = nullptr) = 0;
 
-    static std::unique_ptr<decoder>
-    make(standard const& params, uint64_t samp_rate, video_buffer::frame_cb frame_cb);
+    static std::unique_ptr<decoder> make(standard const& params,
+                                         uint64_t samp_rate,
+                                         bool black_and_white,
+                                         video_buffer::frame_cb frame_cb);
 };
 
 } // namespace atv

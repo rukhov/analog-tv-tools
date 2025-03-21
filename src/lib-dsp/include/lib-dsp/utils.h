@@ -38,6 +38,9 @@ inline double hz2rad(double samp_rate, double hz) { return hz / (samp_rate * DSP
 // Hertz to Hertz per sample
 inline double hz2rel_frq(double samp_rate, double hz) { return hz / samp_rate; }
 
+// Hertz per sample to Hertz
+inline double rel2hz_frq(double samp_rate, double frq) { return frq * samp_rate; }
+
 inline double relTimeSec(double samp_rate, double sec) { return 1 / (sec * samp_rate); }
 
 template <typename T>
