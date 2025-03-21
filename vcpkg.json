@@ -5,6 +5,7 @@
     "gtest",
     "opencv4",
     "libsndfile",
-    "soxr"
+    "soxr",
+    "gstreamer"
   ]
 }
