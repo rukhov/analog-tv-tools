@@ -1,5 +1,7 @@
 # Analog TV Tools project
-This project aims to develop a suite of software tools designed to decode analog TV signals. Currently, it supports the decoding of SECAM CVBS (Composite Video Baseband Signal) TV signals. Support for NTSC and PAL signal decoding will be added in the near future.
+This project focuses on developing a suite of software tools for decoding analog TV signals. The current toolset includes two primary components:
+- Command Line Interface (CLI) Decoder: This tool enables the conversion of digitized analog CVBS SECAM signals into standard AVI video files.
+- GNU Radio Block: This component allows integration of the Analog TV decoder into GNU Radio (https://wiki.gnuradio.org/), facilitating its use within the GNU Radio ecosystem.
 
 ## Samples
 ### Original video footage used for transcoding into digitized SECAM CVBS (Composite Video Baseband Signal).
@@ -12,7 +14,6 @@ https://github.com/user-attachments/assets/aca3b354-d356-47e6-95f8-39b7d00446ff
 ## Build
 You can download pre-built binaries from the GitHub Actions page: https://github.com/rukhov/analog-tv-tools/actions.
 Locate the most recent successful build, and download the artifacts compatible with your operating system.
-Currently, only Windows and Ubuntu Linux are supported.
 
 ##
 Copyright &copy; 2025 Roman Ukhov
