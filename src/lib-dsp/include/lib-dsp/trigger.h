@@ -30,7 +30,17 @@ class trigger : public processor<T>
     T _state = 0;
     std::vector<T> _buffer;
 
-    T _process(T s)
+public:
+    using in_span_t = processor<T>::in_span_t;
+    using out_span_t = processor<T>::out_span_t;
+
+    trigger(T level, bool positive = true) : _on_level(level), _positive(positive) {}
+
+    T state() const { return _state; }
+
+    void reset(T s) { _state = s; }
+
+    inline T _process(T s)
     {
         if (_positive) {
             if (s >= _on_level && _prev_sample < _on_level) {
@@ -48,16 +58,6 @@ class trigger : public processor<T>
         _prev_sample = s;
         return _state;
     }
-
-public:
-    using in_span_t = processor<T>::in_span_t;
-    using out_span_t = processor<T>::out_span_t;
-
-    trigger(T level, bool positive = true) : _on_level(level), _positive(positive) {}
-
-    T state() const { return _state; }
-
-    void reset(T s) { _state = s; }
 
     T process(T s) override { return _process(s); }
 

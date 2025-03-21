@@ -32,16 +32,6 @@ class cross_correlation : public processor<T>
     T _sum = 0;
     const size_t _pulse_length;
 
-    T _process(T s)
-    {
-        _state.push_back(s);
-
-        _sum += _state.back();
-        _sum -= _state.front();
-
-        return _sum;
-    }
-
 public:
     using in_span_t = processor<T>::in_span_t;
     using out_span_t = processor<T>::out_span_t;
@@ -52,6 +42,16 @@ public:
     }
 
     size_t get_pulse_length() const { return _pulse_length; }
+
+    inline T _process(T s)
+    {
+        _state.push_back(s);
+
+        _sum += _state.back();
+        _sum -= _state.front();
+
+        return _sum;
+    }
 
     T process(T s) override { return _process(s); }
 

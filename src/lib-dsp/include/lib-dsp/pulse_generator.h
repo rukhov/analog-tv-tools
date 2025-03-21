@@ -47,7 +47,21 @@ class pulse_generator : public dsp::processor<T>
         return int(delay);
     }
 
-    T _process(T s)
+public:
+    using in_span_t = processor<float>::in_span_t;
+    using out_span_t = processor<float>::out_span_t;
+
+    pulse_generator(double samp_rate, double frequency, int delay)
+        : _frequency(frequency),
+          _frequency_step(frequency * .000000001),
+          _corrector(frequency / 2.),
+          _soft_corrector(frequency / 8.),
+          _start_phase(0.),
+          _pulse_delay(delay)
+    {
+    }
+
+    inline T _process(T s)
     {
         if (s > 0) {
             if (_phase > .999) {
@@ -88,20 +102,6 @@ class pulse_generator : public dsp::processor<T>
         _prev_phase = _phase;
 
         return s;
-    }
-
-public:
-    using in_span_t = processor<float>::in_span_t;
-    using out_span_t = processor<float>::out_span_t;
-
-    pulse_generator(double samp_rate, double frequency, int delay)
-        : _frequency(frequency),
-          _frequency_step(frequency * .000000001),
-          _corrector(frequency / 2.),
-          _soft_corrector(frequency / 8.),
-          _start_phase(0.),
-          _pulse_delay(delay)
-    {
     }
 
     out_span_t process(in_span_t const& in) override

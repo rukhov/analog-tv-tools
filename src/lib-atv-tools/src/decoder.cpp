@@ -23,7 +23,6 @@
 #include "../include/lib-atv-tools/pulse_detector.h"
 #include "../include/lib-atv-tools/pulse_detector2.h"
 
-#include <lib-dsp/cross_correlation.h>
 #include <lib-dsp/iir_low_pass.h>
 #include <lib-dsp/limiter.h>
 #include <lib-dsp/trigger.h>
@@ -41,8 +40,6 @@ class decoder_impl : public decoder
     video_buffer _video_buffer;
 
     dsp::type_convertor<float, int64_t, 1000.f> _integer_cvbs;
-    dsp::cross_correlation<float> _pulse_correlation;
-    dsp::trigger<float> _hsync_trigger;
 
 public:
     decoder_impl(standard const& params,
@@ -51,10 +48,7 @@ public:
                  video_buffer::frame_cb& frame_cb)
         : _pulse_detector(params, samp_rate),
           _color_decoder(params, samp_rate, black_and_white),
-          _video_buffer(params, samp_rate, frame_cb),
-          _pulse_correlation(dsp::usec2samples(samp_rate, params.hsync_pulse_length_us)),
-          _hsync_trigger(-.3 * dsp::usec2samples(samp_rate, params.hsync_pulse_length_us),
-                         false)
+          _video_buffer(params, samp_rate, frame_cb)
     {
     }
 
@@ -74,8 +68,6 @@ private:
         if (!length)
             return;
 
-        // auto int_cvbs = _integer_cvbs.process({ binput, length });
-
         auto in = binput;
         auto yout = video_yout;
         auto uout = video_uout;
@@ -86,9 +78,6 @@ private:
         auto d3out = dbg3;
 
         auto tags = _pulse_detector.process({ binput, length });
-        // auto correlator = _pulse_correlation.process({ binput, length });
-        // auto pulses = _hsync_trigger.process(correlator);
-        //   auto pulses = std::span<int>(int_cvbs);
 
         auto yuv_buff =
             _color_decoder.process(std::span<float const>(binput, length), tags);
@@ -110,19 +99,25 @@ private:
 
             auto pixel = _video_buffer.process(*yuv, *tag);
 
-            if (video_yout && video_uout && video_vout) {
+            if (video_yout) {
                 *yout = pixel.Y;
+            }
+
+            if (video_uout) {
                 *uout = pixel.Cb;
+            }
+
+            if (video_vout) {
                 *vout = pixel.Cr;
             }
 
             if (luma_out) {
-                *lout = yuv->y;
-                //*lout = *in;
+                //*lout = yuv->y;
+                *lout = *in;
             }
 
             if (dbg1) {
-                //*d1out = in[i];
+                *d1out = *tag;
                 //*bout2 = 0;
                 //*d1out = (*tag) & (cvbs_tag::vsync_odd | cvbs_tag::vsync_even);
                 //*d1out = pd_debug1;

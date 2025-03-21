@@ -23,7 +23,6 @@
 #include <lib-dsp/cross_correlation.h>
 #include <lib-dsp/differentiator.h>
 #include <lib-dsp/integrator.h>
-#include <lib-dsp/peack_detector.h>
 #include <lib-dsp/pll.h>
 #include <lib-dsp/pulse_detector.h>
 #include <lib-dsp/pulse_generator.h>
@@ -44,27 +43,7 @@ public:
     pulse_detector2(standard const& standard, double samp_rate)
         : _hline_length(dsp::usec2samples(samp_rate, standard.H_us)),
           _H_div_2_length(_hline_length / 2),
-          _vsync_trigger(.25, true),
-          _hsync_pll(dsp::pll::make_regular(
-              dsp::hz2rel_frq(samp_rate, standard.hsync_pulse_frequency_hz),
-              dsp::hz2rel_frq(samp_rate, standard.hsync_pulse_frequency_hz) / 100)),
-          _hsync_trigger(.738, true),
-          _sync_pulse_detector(
-              dsp::usec2samples(samp_rate,
-                                standard.pre_equalisation_pulse_length_us / 2 * .7),
-              .2,
-              .01),
-          _vsync_integrator(dsp::relTimeSec(samp_rate, .0001)),
-          _vsync_dc_eliminator(
-              dsp::sec2samples(samp_rate, 1 / standard.vsync_pulse_frequency_hz)),
-          _color_burst_sync(
-              dsp::usec2samples(samp_rate,
-                                standard.h_ref_point_to_burst_styart_us -
-                                    standard.hsync_pulse_length_us),
-              dsp::usec2samples(samp_rate, standard.chroma_burst_duration_us)),
 
-
-          _hsync(dsp::usec2samples(samp_rate, 1.35), 1),
           _hpulse_correlator(
               dsp::usec2samples(samp_rate, standard.hsync_pulse_length_us)),
           _hpulse_trigger(
@@ -84,13 +63,6 @@ public:
     {
     }
 
-    void reset_pulses()
-    {
-        _even_frame = _cycles_since_hline_start % _hline_length < _H_div_2_length;
-        // std::cout << _hsync_line_counter << ".";
-        _hsync_line_counter = 0;
-    }
-
     bool event_frame() const { return _even_frame; }
 
     std::span<uint32_t> const process(std::span<float const> const& in_cvbs)
@@ -104,9 +76,9 @@ public:
              ++i, ++_cycles_since_hpulse, ++_cycles_since_vpulse) {
 
             auto hsync_trigger =
-                _hpulse_trigger.process(_hpulse_correlator.process(in_cvbs[i]));
-            auto hsync_trigger_delay = _hpulse_delay.process(hsync_trigger);
-            auto hsync = _hsync_pulse_generator.process(
+                _hpulse_trigger._process(_hpulse_correlator._process(in_cvbs[i]));
+            auto hsync_trigger_delay = _hpulse_delay._process(hsync_trigger);
+            auto hsync = _hsync_pulse_generator._process(
                 (_cycles_since_vpulse > _smoothing_length) ? hsync_trigger_delay : 0);
             // auto hsync = hsync_trigger_delay;
 
@@ -146,13 +118,9 @@ private:
     const uint64_t _hline_length;
     const uint64_t _H_div_2_length;
 
-    // sync
-    // pulse_trigger<float> _pulse_trigger;
-    // hsync
     dsp::cross_correlation<float> _hpulse_correlator;
     dsp::trigger<float> _hpulse_trigger;
     dsp::delay<float> _hpulse_delay;
-    // dsp::peack_detector<float> _hpulse_trigger;
     float _hpulse_correlator_min_state = 0;
     bool _hpulse_in_pulse_state = false;
     dsp::pulse_generator<float> _hsync_pulse_generator;
@@ -166,21 +134,7 @@ private:
     uint64_t _cycles_since_vpulse = 0;
     const uint64_t _smoothing_length;
 
-    dsp::pulse_detector<float> _sync_pulse_detector;
-    std::unique_ptr<dsp::pll> _hsync_pll;
-    dsp::trigger<float> _hsync_trigger;
-    dsp::integrator<float> _vsync_integrator;
-    dsp::differentiator<float> _vsync_dc_eliminator;
-    dsp::trigger<float> _vsync_trigger;
-    dsp::unovibrator<int8_t> _hsync;
-    dsp::unovibrator<int8_t> _color_burst_sync;
-
     bool _even_frame = false;
-
-    uint64_t _cycles_since_pulse_raise = 0;
-    uint64_t _cycles_since_pulse_fall = 0;
-    uint64_t _cycles_since_hline_start = 0;
-    bool _hline = false;
 
     uint64_t _hsync_line_counter = 0;
 

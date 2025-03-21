@@ -31,12 +31,6 @@ class delay : public processor<T>
     boost::circular_buffer<T> _buffer;
     std::vector<T> _out_buffer;
 
-    T _process(T s)
-    {
-        _buffer.push_back(s);
-        return state();
-    }
-
 public:
     using in_span_t = processor<T>::in_span_t;
     using out_span_t = processor<T>::out_span_t;
@@ -47,6 +41,12 @@ public:
     size_t length() const { return _buffer.size(); }
 
     T state() const { return _buffer.front(); }
+
+    inline T _process(T s)
+    {
+        _buffer.push_back(s);
+        return state();
+    }
 
     T process(T s) override { return _process(s); }
 

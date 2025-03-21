@@ -6,7 +6,7 @@ import re
 def test_decode(projectPath, decoderPath):
 
     tmpFolder = Path( tempfile.gettempdir() )
-    inputFile = Path( projectPath + '/test-data/cartoon-test-video-4-36000000Hz.i16')
+    inputFile = Path( projectPath + '/test-data/cartoon-test-video-4-16000000Hz.i16')
     aviOutputFile = tmpFolder.joinpath(inputFile.stem).with_suffix(".avi")
 
     tmpFolder.mkdir(0o777, True, True)
@@ -18,7 +18,7 @@ def test_decode(projectPath, decoderPath):
             " --standard secam"
             " --input-file " + str(inputFile) +
             " --output-file " + str(aviOutputFile) +
-            " --sample-rate 36000000"
+            " --sample-rate 16000000"
             " --dc-correction .0"
             " --amplification 1.333"
             " --max-frames 0"
@@ -28,4 +28,4 @@ def test_decode(projectPath, decoderPath):
     
     m = re.search(r'Total frame number: (\d+)', out)
 
-    assert int(m[1]) == 33
+    assert int(m[1]) == 80
