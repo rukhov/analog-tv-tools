@@ -22,18 +22,18 @@ def test_decode(projectPath, decoderPath):
             " --sample-rate 36000000"
             " --dc-correction .0"
             " --amplification 1.333"
-            " --max-frames 2"
+            " --max-frames 5"
             )
     
     out = child.read()
 
     m = re.search(r'Total frame number: (\d+)', out)
 
-    assert int(m[1]) == 2
+    assert int(m[1]) == 5
     
     #check colors
 
-    vc = fc.VideoColorChecker(str(aviOutputFile), 1) 
+    vc = fc.VideoColorChecker(str(aviOutputFile), 4) 
     assert vc.isOpen() == True
 
     tolerance = 20  # Tolerance value for color comparison

@@ -14,7 +14,7 @@
 /* BINDTOOL_GEN_AUTOMATIC(0)                                                       */
 /* BINDTOOL_USE_PYGCCXML(0)                                                        */
 /* BINDTOOL_HEADER_FILE(TvDecode.h)                                        */
-/* BINDTOOL_HEADER_FILE_HASH(decbe2b099d57c15792d5f4b4d1f1d61)                     */
+/* BINDTOOL_HEADER_FILE_HASH(06bff7cae3c664c62f4ff54035e16d92)                     */
 /***********************************************************************************/
 
 #include <pybind11/complex.h>
@@ -30,30 +30,14 @@ namespace py = pybind11;
 void bind_TvDecode(py::module& m)
 {
 
-    using TvDecode    = gr::AnalogTV::TvDecode;
+    using TvDecode = gr::AnalogTV::TvDecode;
 
 
-    py::class_<TvDecode, gr::block, gr::basic_block,
-        std::shared_ptr<TvDecode>>(m, "TvDecode", D(TvDecode))
+    py::class_<TvDecode, gr::block, gr::basic_block, std::shared_ptr<TvDecode>>(
+        m, "TvDecode", D(TvDecode))
 
-        .def(py::init(&TvDecode::make),
-           D(TvDecode,make)
-        )
-        
-
+        .def(py::init(&TvDecode::make), D(TvDecode, make))
 
 
         ;
-
-
-
-
 }
-
-
-
-
-
-
-
-

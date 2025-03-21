@@ -36,6 +36,7 @@ char const* INPUT_TYPE_OPTION = "input-type";
 char const* OUTPUT_TYPE_OPTION = "output-type";
 char const* STANDARD_OPTION = "standard";
 char const* BASEBAND_CARRIER_FREQUENCY_OPTION = "baseband-carrier-frequency";
+char const* BLACK_AND_WHITE_MODE_OPTION = "bw";
 
 } // namespace
 
@@ -71,6 +72,9 @@ options read_options(int argc, char* argv[])
         (BASEBAND_CARRIER_FREQUENCY_OPTION,
          po::value<double>(),
          "Baseband carrier frequency, Hz") //
+        (BLACK_AND_WHITE_MODE_OPTION,
+         po::value<bool>(),
+         "Black&White mode, 0 or 1, default is 0") //
         ;
 
     po::variables_map vm;
@@ -169,6 +173,11 @@ options read_options(int argc, char* argv[])
     if (vm.count(MAX_FRAME_NUMBER_OPTION)) {
         opts.max_frame_number = vm[MAX_FRAME_NUMBER_OPTION].as<uint64_t>();
         std::cout << std::format("Maximum frames\t: {}\n", opts.max_frame_number);
+    }
+
+    if (vm.count(BLACK_AND_WHITE_MODE_OPTION)) {
+        opts.balck_and_white = vm[BLACK_AND_WHITE_MODE_OPTION].as<bool>();
+        std::cout << std::format("Black&White mode\t: {}\n", opts.balck_and_white);
     }
 
     return opts;
