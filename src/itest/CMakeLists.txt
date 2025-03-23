@@ -9,6 +9,7 @@ target_include_directories(${TARGET_NAME}
 target_sources(${TARGET_NAME} PRIVATE
     main.cpp
     opencv_test.cpp
+    live555_test.cpp
     #gstreamer_test.cpp
 )
 
@@ -18,6 +19,8 @@ set(LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
 
 target_link_libraries(${TARGET_NAME} 
     PRIVATE GTest::gtest GTest::gtest_main opencv_videoio 
+    PRIVATE unofficial::groupsock unofficial::liveMedia unofficial::BasicUsageEnvironment unofficial::UsageEnvironment
+    PRIVATE OpenSSL::SSL
 #    PRIVATE GStreamer::GStreamer
 )
 

@@ -19,6 +19,7 @@ find_package(GTest REQUIRED)
 find_package(SndFile REQUIRED)
 find_package(Boost CONFIG REQUIRED COMPONENTS circular_buffer program_options)
 find_package(OpenCV REQUIRED)
+find_package(unofficial-live555 REQUIRED)
 
 set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(CMAKE_CXX_STANDARD 23)
