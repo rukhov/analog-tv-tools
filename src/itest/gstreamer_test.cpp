@@ -19,11 +19,16 @@
 
 #include <gtest/gtest.h>
 
+#include <gio/gio.h>
 #include <gst/app/app.h>
 #include <gst/gst.h>
+
 #include <chrono>
 #include <iostream>
 #include <thread>
+
+GST_DEBUG_CATEGORY(appsrc_pipeline_debug);
+#define GST_CAT_DEFAULT appsrc_pipeline_debug
 
 // Buffer data (simulated video frames)
 const int frame_size = 640 * 480 * 3; // Example: 640x480 RGB frames
@@ -71,12 +76,13 @@ static void need_data(GstElement* appsrc, guint unused_size, gpointer user_data)
 
 TEST(gstreamer, First)
 {
-    char* argv[] = { "itest" };
-    int argc = 0;
-    // Initialize GStreamer
-    gst_init(&argc, (char***)&(argv));
-
     GError* err = nullptr;
+    gst_init_check(nullptr, nullptr, &err);
+
+    EXPECT_EQ(err, nullptr);
+
+    GST_DEBUG_CATEGORY_INIT(
+        appsrc_pipeline_debug, "appsrc-pipeline", 0, "appsrc pipeline example");
 
     // Create the pipeline
     GstElement* pipeline =
@@ -86,6 +92,11 @@ TEST(gstreamer, First)
         std::cout << std::format("Error: {}\n", err->message);
     }
 
-    // EXPECT_NE(pipeline, nullptr);
+    EXPECT_NE(pipeline, nullptr);
+
+    GstAppStreamType aa = gst_app_src_get_stream_type(nullptr);
+
     EXPECT_TRUE(true);
+
+    gst_deinit();
 }

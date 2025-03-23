@@ -1,9 +1,13 @@
 
 function(FIND_GSTREAMER)
 
-    #message("=========================VCPKG_INSTALLED_DIR: " ${VCPKG_INSTALLED_DIR})
-    file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.a)
-    #message("=========================GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
+    message("=========================VCPKG_INSTALLED_DIR: " ${VCPKG_INSTALLED_DIR})
+    if(UNIX)
+        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.a)
+    elseif(WIN32)
+        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.lib)
+    endif()
+    message("=========================GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
     list(GET GSTREAMER_LIBS_DIR -1 GSTREAMER_LIBS_DIR)
     cmake_path(GET GSTREAMER_LIBS_DIR PARENT_PATH GSTREAMER_LIBS_DIR)
     set(GSTREAMER_LIBS_DIR ${GSTREAMER_LIBS_DIR} PARENT_SCOPE)
@@ -32,11 +36,6 @@ function(FIND_GSTREAMER)
 
     #message("===========> !GSTREAMER_INCLUDE_DIRS: " ${GSTREAMER_INCLUDE_DIRS})
 
-    file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstreamer-?.?.a )
-    list(GET GSTREAMER_LIBS_DIR -1 GSTREAMER_LIBS_DIR)
-    cmake_path(GET GSTREAMER_LIBS_DIR PARENT_PATH GSTREAMER_LIBS_DIR)
-#    message("===========> !GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
-
     file(GLOB_RECURSE GLIB_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libglib-?.?.a )
     list(GET GLIB_LIBS_DIR -1 GLIB_LIBS_DIR)
     cmake_path(GET GLIB_LIBS_DIR PARENT_PATH GLIB_LIBS_DIR )
@@ -61,6 +60,10 @@ target_link_libraries(${GSTREAMER_TARGET_NAME}::GStreamer
     INTERFACE ${GLIB_LIBS_DIR}/libglib-2.0.a
     INTERFACE libffi
     INTERFACE PCRE2::8BIT
+    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstreamer-1.0.a
+
+    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstapp-1.0.a
+    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstbase-1.0.a
 )
 
 target_include_directories(${GSTREAMER_TARGET_NAME}::GStreamer  INTERFACE
