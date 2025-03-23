@@ -42,6 +42,7 @@ string(REPLACE "/Ob1" "/Ob0" CMAKE_CXX_FLAGS_RELWITHDEBINFO ${CMAKE_CXX_FLAGS_RE
 
 include(cmake/FindSiglib.cmake)
 include(cmake/FindIir1.cmake)
+include(cmake/FindGStreamer.cmake)
 
 add_subdirectory(src)
 if(BUILD_PYTHON_TESTS)

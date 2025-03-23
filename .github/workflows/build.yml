@@ -31,7 +31,8 @@ jobs:
           sudo apt-get --yes install autoconf automake pkg-config autoconf-archive
           sudo apt-get --yes install liburing-dev libx11-dev libxft-dev libtool bison gperf libgles2-mesa-dev libxext-dev libxrandr-dev libxi-dev 
           sudo apt-get --yes install libxcursor-dev libxdamage-dev libxinerama-dev libltdl-dev libxtst-dev doxygen gnuradio gnuradio-dev 
-          sudo apt-get --yes install python3-opencv python3-pytest
+          sudo apt-get --yes install python3-opencv python3-pytest flex nasm
+          sudo apt-get --yes install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
 
       - name: Install Windows Prerequisites
         if: ${{ matrix.platform == 'windows' }}
