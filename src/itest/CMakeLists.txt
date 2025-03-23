@@ -17,12 +17,23 @@ target_precompile_headers(${TARGET_NAME} PRIVATE stdafx.h)
 
 set(LIB_DIR ${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/lib)
 
-target_link_libraries(${TARGET_NAME} 
-    PRIVATE GTest::gtest GTest::gtest_main opencv_videoio 
-    PRIVATE unofficial::groupsock unofficial::liveMedia unofficial::BasicUsageEnvironment unofficial::UsageEnvironment
-    PRIVATE OpenSSL::SSL
-#    PRIVATE GStreamer::GStreamer
-)
+if(UNIX)
+    target_link_libraries(${TARGET_NAME} 
+        PRIVATE GTest::gtest GTest::gtest_main opencv_videoio 
+        PRIVATE unofficial::groupsock unofficial::liveMedia unofficial::BasicUsageEnvironment unofficial::UsageEnvironment
+        PRIVATE OpenSSL::SSL
+    #    PRIVATE GStreamer::GStreamer
+    )
+elseif(WIN32)
+    target_link_libraries(${TARGET_NAME} 
+        PRIVATE GTest::gtest GTest::gtest_main opencv_videoio 
+        PRIVATE unofficial::groupsock unofficial::liveMedia unofficial::BasicUsageEnvironment unofficial::UsageEnvironment
+        PRIVATE OpenSSL::SSL
+        PRIVATE ws2_32.lib
+    #    PRIVATE GStreamer::GStreamer
+    )
+endif()
+
 
 add_test(NAME "Integration tests" 
     COMMAND 

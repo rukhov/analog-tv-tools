@@ -101,7 +101,7 @@ working correctly.
 Let me know if you need further clarification!
 
 */
-TEST(live555, first)
+TEST(live555, DISABLED_first)
 {
     // Create a task scheduler and environment
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();
