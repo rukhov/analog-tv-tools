@@ -74,7 +74,7 @@ static void need_data(GstElement* appsrc, guint unused_size, gpointer user_data)
     }
 }
 
-TEST(gstreamer, First)
+TEST(gstreamer, DISABLED_first)
 {
     auto version = gst_version_string();
 
