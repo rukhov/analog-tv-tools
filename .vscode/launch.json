@@ -60,7 +60,7 @@
         ]
     },
     {
-        "name": "Linux - Unit Tests",
+        "name": "Linux - Debug Unit Tests",
         "type": "cppdbg",
         "request": "launch",
         "program": "${workspaceFolder}/../build/bin/analog-tv-tools_unit_tests",
@@ -88,6 +88,36 @@
         "stopAtEntry": false,
         "cwd": "${workspaceFolder}/../build/bin",
         "externalConsole": false,
+        "avoidWindowsConsoleRedirection": true,
+        "setupCommands": [
+            {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+            }
+        ]
+    },
+    {
+        "name": "Windows - CLI",
+        "type": "cppvsdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/../build/bin/Release/analog-tv-tools-cli.exe",
+        "args": [
+            "--input-type", "i16",
+            "--input-data-type", "cvbs",
+            "--out-cvbs-raw-file", "/tmp/cvbs-secam-color-bars.f32",
+            "--standard", "secam",
+            "--input-file", "${workspaceFolder}/test-data/cartoon-test-video-4-16000000Hz.i16",
+            "--output-file", "/tmp/test.avi",
+            "--sample-rate", "16000000",
+            "--dc-correction", "0",
+            "--amplification", "1.333",
+            "--max-frames", "10",
+            "--bw", "1",
+        ],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/../build/bin",
+        "externalConsole": true,
         "avoidWindowsConsoleRedirection": true,
         "setupCommands": [
             {
