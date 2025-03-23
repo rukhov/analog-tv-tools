@@ -1,13 +1,13 @@
 
 function(FIND_GSTREAMER)
 
-    message("=========================VCPKG_INSTALLED_DIR: " ${VCPKG_INSTALLED_DIR})
+#    message("=========================VCPKG_INSTALLED_DIR: " ${VCPKG_INSTALLED_DIR})
     if(UNIX)
         file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.a)
     elseif(WIN32)
-        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.lib)
+        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/gstbase*.lib)
     endif()
-    message("=========================GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
+ #   message("=========================GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
     list(GET GSTREAMER_LIBS_DIR -1 GSTREAMER_LIBS_DIR)
     cmake_path(GET GSTREAMER_LIBS_DIR PARENT_PATH GSTREAMER_LIBS_DIR)
     set(GSTREAMER_LIBS_DIR ${GSTREAMER_LIBS_DIR} PARENT_SCOPE)
