@@ -76,6 +76,10 @@ static void need_data(GstElement* appsrc, guint unused_size, gpointer user_data)
 
 TEST(gstreamer, First)
 {
+    auto version = gst_version_string();
+
+    EXPECT_NE(version, nullptr);
+
     GError* err = nullptr;
     gst_init_check(nullptr, nullptr, &err);
 
@@ -94,9 +98,7 @@ TEST(gstreamer, First)
 
     EXPECT_NE(pipeline, nullptr);
 
-    GstAppStreamType aa = gst_app_src_get_stream_type(nullptr);
-
-    EXPECT_TRUE(true);
+    // GstAppStreamType aa = gst_app_src_get_stream_type(nullptr);
 
     gst_deinit();
 }
