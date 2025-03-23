@@ -76,9 +76,15 @@ TEST(gstreamer, First)
     // Initialize GStreamer
     gst_init(&argc, (char***)&(argv));
 
+    GError* err = nullptr;
+
     // Create the pipeline
     GstElement* pipeline =
-        gst_parse_launch("appsrc name=source ! videoconvert ! autovideosink", nullptr);
+        gst_parse_launch("appsrc name=source ! videoconvert ! autovideosink", &err);
+
+    if (!pipeline) {
+        std::cout << std::format("Error: {}\n", err->message);
+    }
 
     EXPECT_NE(pipeline, nullptr);
 }
