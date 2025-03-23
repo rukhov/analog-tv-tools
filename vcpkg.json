@@ -6,10 +6,9 @@
     "opencv4",
     "libsndfile",
     "soxr",
-    {
-      "name": "live555",
-      "version>=": "2024-11-28"
-    }
+    "live555"
   ],
-  "builtin-baseline": "b02e341c927f16d991edbd915d8ea43eac52096c"
+  "vcpkg-configuration": {
+    "overlay-ports": ["cmake/ports"]
+  }
 }
