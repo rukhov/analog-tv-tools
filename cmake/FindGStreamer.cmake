@@ -5,7 +5,7 @@ function(FIND_GSTREAMER)
     if(UNIX)
         file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.a)
     elseif(WIN32)
-        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libgstbase-?.?.lib)
+        file(GLOB_RECURSE GSTREAMER_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/gstbase-?.?.lib)
     endif()
     message("=========================GSTREAMER_LIBS_DIR: " ${GSTREAMER_LIBS_DIR})
     list(GET GSTREAMER_LIBS_DIR -1 GSTREAMER_LIBS_DIR)
@@ -36,7 +36,11 @@ function(FIND_GSTREAMER)
 
     #message("===========> !GSTREAMER_INCLUDE_DIRS: " ${GSTREAMER_INCLUDE_DIRS})
 
-    file(GLOB_RECURSE GLIB_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libglib-?.?.a )
+    if(UNIX)
+        file(GLOB_RECURSE GLIB_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/libglib-?.?.a )
+    elseif(WIN32)
+    file(GLOB_RECURSE GLIB_LIBS_DIR ${VCPKG_INSTALLED_DIR}/*/glib-?.?.lib )
+    endif()
     list(GET GLIB_LIBS_DIR -1 GLIB_LIBS_DIR)
     cmake_path(GET GLIB_LIBS_DIR PARENT_PATH GLIB_LIBS_DIR )
  #   message("===========> !GLIB_LIBS_DIR: " ${GLIB_LIBS_DIR})
@@ -54,22 +58,38 @@ set(GSTREAMER_TARGET_NAME GStreamer)
 
 add_library(${GSTREAMER_TARGET_NAME}::GStreamer STATIC IMPORTED)
 
-target_link_libraries(${GSTREAMER_TARGET_NAME}::GStreamer 
-    INTERFACE ${GLIB_LIBS_DIR}/libgobject-2.0.a
-    INTERFACE ${GLIB_LIBS_DIR}/libgmodule-2.0.a
-    INTERFACE ${GLIB_LIBS_DIR}/libglib-2.0.a
-    INTERFACE libffi
-    INTERFACE PCRE2::8BIT
-    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstreamer-1.0.a
-
-    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstapp-1.0.a
-    INTERFACE ${GSTREAMER_LIBS_DIR}/libgstbase-1.0.a
-)
-
 target_include_directories(${GSTREAMER_TARGET_NAME}::GStreamer  INTERFACE
     ${GSTREAMER_INCLUDE_DIRS}
 )
 
-set_property(TARGET ${GSTREAMER_TARGET_NAME}::GStreamer
-    PROPERTY IMPORTED_LOCATION ${GSTREAMER_LIBS_DIR}/libgstreamer-1.0.a
-)
+if(UNIX)
+    target_link_libraries(${GSTREAMER_TARGET_NAME}::GStreamer 
+        INTERFACE ${GLIB_LIBS_DIR}/libgobject-2.0.a
+        INTERFACE ${GLIB_LIBS_DIR}/libgmodule-2.0.a
+        INTERFACE ${GLIB_LIBS_DIR}/libglib-2.0.a
+        INTERFACE libffi
+        INTERFACE PCRE2::8BIT
+        INTERFACE ${GSTREAMER_LIBS_DIR}/libgstreamer-1.0.a
+        INTERFACE ${GSTREAMER_LIBS_DIR}/libgstapp-1.0.a
+        INTERFACE ${GSTREAMER_LIBS_DIR}/libgstbase-1.0.a
+    )
+    set_property(TARGET ${GSTREAMER_TARGET_NAME}::GStreamer
+        PROPERTY IMPORTED_LOCATION ${GSTREAMER_LIBS_DIR}/libgstreamer-1.0.a
+    )
+elseif(WIN32)
+    target_link_libraries(${GSTREAMER_TARGET_NAME}::GStreamer 
+        INTERFACE ${GLIB_LIBS_DIR}/gobject-2.0.lib
+        INTERFACE ${GLIB_LIBS_DIR}/gmodule-2.0.lib
+        INTERFACE ${GLIB_LIBS_DIR}/glib-2.0.lib
+        INTERFACE libffi
+        INTERFACE PCRE2::8BIT
+        INTERFACE ${GSTREAMER_LIBS_DIR}/gstreamer-1.0.lib
+        INTERFACE ${GSTREAMER_LIBS_DIR}/gstapp-1.0.lib
+        INTERFACE ${GSTREAMER_LIBS_DIR}/gstbase-1.0.lib
+    )
+
+    set_property(TARGET ${GSTREAMER_TARGET_NAME}::GStreamer
+        PROPERTY IMPORTED_LOCATION ${GSTREAMER_LIBS_DIR}/gstreamer-1.0.lib
+    )
+endif()
+
