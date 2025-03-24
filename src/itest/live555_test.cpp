@@ -40,6 +40,7 @@ protected:
 private:
     virtual void doGetNextFrame()
     {
+        std::cout << "doGetNextFrame\n";
         // Simulate reading from an internal buffer
         static const char* testData = "This is a test frame.";
         unsigned frameSize = strlen(testData);
@@ -76,6 +77,22 @@ sockaddr_storage in_addr_2_sockaddr_storage(const in_addr& ipv4_addr)
     return storage;
 }
 
+void afterPlayingFunc(void* clientData) { std::cout << "afterPlayingFunc" << std::endl; }
+void StartStreamTask(void* clientData) { std::cout << "StartStreamTask" << std::endl; }
+
+void std_function_task_wrapper(void* clientData)
+{
+    auto func = reinterpret_cast<std::function<void()>*>(clientData);
+    func->operator()();
+    delete func;
+}
+
+void shedule_task(TaskScheduler& scheduler, std::function<void()> const& f)
+{
+    scheduler.scheduleDelayedTask(
+        100000, &std_function_task_wrapper, new std::function<void()>(f));
+}
+
 /*
 Key Points
 You cannot directly convert InternalBufferSource* to RTCPInstance* because they are
@@ -101,7 +118,7 @@ working correctly.
 Let me know if you need further clarification!
 
 */
-TEST(live555, DISABLED_first)
+TEST(live555, server)
 {
     // Create a task scheduler and environment
     TaskScheduler* scheduler = BasicTaskScheduler::createNew();
@@ -119,24 +136,45 @@ TEST(live555, DISABLED_first)
     Groupsock rtcpGroupsock(
         *env, in_addr_2_sockaddr_storage(destinationAddress), rtcpPortNum, ttl);
 
-    // Create a custom FramedSource
-    InternalBufferSource* source = InternalBufferSource::createNew(*env);
+    auto start_streaming = [&]() {
+        // Create a custom FramedSource
+        InternalBufferSource* source = InternalBufferSource::createNew(*env);
 
-    // Create an RTP sink (e.g., for H.264 video)
-    RTPSink* sink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
+        // Create an RTP sink (e.g., for H.264 video)
+        RTPSink* sink = H264VideoRTPSink::createNew(*env, &rtpGroupsock, 96);
 
-    // Create an RTCP instance
-    RTCPInstance* rtcp = RTCPInstance::createNew(
-        *env, &rtcpGroupsock, 50000, (const uint8_t*)"example@test.com", sink, NULL);
+        // Create an RTCP instance
+        RTCPInstance* rtcp = RTCPInstance::createNew(
+            *env, &rtcpGroupsock, 50000, (const uint8_t*)"example@test.com", sink, NULL);
+        // Start the RTCP instance
+        rtcp->setByeHandler(NULL, NULL); // Optional: Set a handler for BYE packets
 
-    // Start playing the sink
-    sink->startPlaying(*source, NULL, NULL);
+        // Start playing the sink
+        auto res = sink->startPlaying(*source, &afterPlayingFunc, NULL);
 
-    // Start the RTCP instance
-    rtcp->setByeHandler(NULL, NULL); // Optional: Set a handler for BYE packets
+        // Create a server media session
+        ServerMediaSession* sms = ServerMediaSession::createNew(
+            *env, "testStream", "Test Stream", "Session Description");
+        sms->addSubsession(PassiveServerMediaSubsession::createNew(*sink, rtcp));
+        RTSPServer* rtspServer = RTSPServer::createNew(*env, 8554);
+        if (rtspServer == NULL) {
+            *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
+            exit(1);
+        }
 
+        rtspServer->addServerMediaSession(sms);
+
+        // Announce the stream
+        char* url = rtspServer->rtspURL(sms);
+        *env << "Stream is available at: " << url << "\n";
+        delete[] url;
+    };
+
+    shedule_task(*scheduler, start_streaming);
+
+    std::printf("Starting event loop.\n");
     // Start the event loop
-    env->taskScheduler().doEventLoop();
+    scheduler->doEventLoop();
 
     EXPECT_TRUE(true);
 }
