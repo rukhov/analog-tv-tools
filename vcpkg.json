@@ -5,6 +5,10 @@
     "gtest",
     "opencv4",
     "libsndfile",
-    "soxr"
-  ]
+    "soxr",
+    "live555"
+  ],
+  "vcpkg-configuration": {
+    "overlay-ports": ["cmake/ports"]
+  }
 }
